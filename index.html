@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Планер Паттайя</title>
   <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
 </head>
 <body>
   <div class="tabs">
@@ -14,28 +15,28 @@
   </div>
 
   <div class="content">
-    <section id="calendar" class="tab-content">
+    <div id="calendar" class="tab-content">
       <div class="filters">
         <button class="filter active" data-filter="all">🔄 Все</button>
         <button class="filter" data-filter="sea">🌊 Море</button>
         <button class="filter" data-filter="sight">🏛️ Достопримеч.</button>
       </div>
       <div class="cards"></div>
-    </section>
+    </div>
 
-    <section id="tips" class="tab-content hidden">
+    <div id="tips" class="tab-content hidden">
       <h2>💡 Полезная информация</h2>
-      <div class="section" id="travel-tips">
+      <div class="section">
         <h3>Советы по поездке</h3>
         <ul>
           <li>💧 Не забывайте воду и солнцезащитный крем.</li>
           <li>👗 Для храмов необходима закрытая одежда.</li>
-          <li>⏱️ Запланируйте поездки на острова заранее.</li>
-          <li>🐠 Лучшее время для снорклинга — до 11:00.</li>
-          <li>👟 Удобная обувь для прогулок в садах Нонг Нуч.</li>
+          <li>⏱️ Планируйте поездки заранее.</li>
+          <li>🐠 Снорклинг до 11:00.</li>
+          <li>👟 Удобная обувь.</li>
         </ul>
       </div>
-      <div class="section" id="must-try">
+      <div class="section">
         <h3>Обязательно попробовать</h3>
         <ul>
           <li>🥘 Phanaeng Curry</li>
@@ -50,18 +51,18 @@
           <li>🍲 Tom Yum Goong</li>
         </ul>
       </div>
-    </section>
+    </div>
 
-    <section id="contacts" class="tab-content hidden">
+    <div id="contacts" class="tab-content hidden">
       <h2>📇 Контакты</h2>
       <ul>
-        <li>🏠 Club Royal Condominium (12.969175,100.888124)</li>
-        <li>📞 Туристический офис: +66 38 253 000</li>
-        <li>🚕 Такси: +66 98 771 7100</li>
-        <li>🏥 Pattaya Memorial Hospital: +66 38 428 428</li>
-        <li>🚨 Экстренные службы: 1155</li>
+        <li>🏠 Club Royal Condominium</li>
+        <li>📞 +66 38 253 000</li>
+        <li>🚕 +66 98 771 7100</li>
+        <li>🏥 +66 38 428 428</li>
+        <li>🚨 1155</li>
       </ul>
-    </section>
+    </div>
   </div>
 
   <div id="overlay" class="overlay hidden"></div>
@@ -70,7 +71,5 @@
     <h3>🕒 <span id="detailsTitle"></span></h3>
     <ul id="scheduleList"></ul>
   </div>
-
-  <script src="app.js"></script>
 </body>
 </html>
