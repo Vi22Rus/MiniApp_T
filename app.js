@@ -1,36 +1,40 @@
 (function(){
   'use strict';
 
-  // ===== Версия в UI =====
+  // ===== Utilities =====
+  function $(sel, root){ return (root||document).querySelector(sel); }
+  function $all(sel, root){ return (root||document).querySelectorAll(sel); }
+  function on(el, evt, cb, opt){ el && el.addEventListener(evt, cb, opt||false); }
+
+  // ===== Version in UI =====
   var ver = (document.body && document.body.dataset && document.body.dataset.version) ? document.body.dataset.version : 'dev';
-  var verEl = document.getElementById('appVersion');
-  if (verEl) verEl.textContent = 'v' + ver;
+  var verEl = $('#appVersion'); if (verEl) verEl.textContent = 'v' + ver;
 
-  // ===== Telegram SDK =====
+  // ===== Telegram SDK & Theming =====
   var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-  if (tg) { if (typeof tg.expand === 'function') tg.expand(); if (typeof tg.ready === 'function') tg.ready(); }
+  if (tg){ if (typeof tg.expand==='function') tg.expand(); if (typeof tg.ready==='function') tg.ready(); }
 
-  // Применение темы Telegram к CSS custom properties
-  function applyTheme() {
+  function applyTheme(){
     if (!tg || !tg.themeParams) return;
     var p = tg.themeParams;
-    // Базовые
-    if (p.bg_color)    document.documentElement.style.setProperty('--tg-bg', p.bg_color);
-    if (p.text_color)  document.documentElement.style.setProperty('--tg-text', p.text_color);
-    if (p.hint_color)  document.documentElement.style.setProperty('--tg-subtle', p.hint_color);
-    // Акцентные
-    if (p.button_color) document.documentElement.style.setProperty('--tg-accent', p.button_color);
-    // Цвета карточек можно подмешать к акценту при тёмной теме
-    if (p.secondary_bg_color) {
-      document.documentElement.style.setProperty('--tg-card-sea', p.secondary_bg_color);
+
+    // base
+    if (p.bg_color)      document.documentElement.style.setProperty('--bg', p.bg_color);
+    if (p.text_color)    document.documentElement.style.setProperty('--text', p.text_color);
+    if (p.hint_color)    document.documentElement.style.setProperty('--muted', p.hint_color);
+    if (p.button_color)  document.documentElement.style.setProperty('--accent', p.button_color);
+    if (p.button_text_color) document.documentElement.style.setProperty('--accent-2', p.button_text_color); // контраст/доп. оттенок
+
+    // оттенки карточек при темных темах — легкий сдвиг
+    if (p.secondary_bg_color){
+      document.documentElement.style.setProperty('--surface', 'rgba(255,255,255,0.06)');
+      document.documentElement.style.setProperty('--glass', 'rgba(255,255,255,0.08)');
     }
   }
   applyTheme();
-  if (tg && typeof tg.onEvent === 'function') {
-    tg.onEvent('themeChanged', function(){ applyTheme(); });
-  }
+  if (tg && typeof tg.onEvent==='function') tg.onEvent('themeChanged', function(){ applyTheme(); });
 
-  // ===== Данные =====
+  // ===== Data (28 дней) =====
   var activities = [
     { type:'sea',   date:'29.12.2025', text:'Пляж Джомтьен + детская зона' },
     { type:'sea',   date:'30.12.2025', text:'Пляж Вонгамат + водные горки' },
@@ -63,72 +67,79 @@
   ];
 
   // ===== DOM =====
-  var cardsContainer = document.querySelector('.cards');
-  var tabs = document.querySelectorAll('.tab');
-  var panels = document.querySelectorAll('.tab-content');
-  var filters = document.querySelectorAll('.filter');
+  var cardsWrap = $('.cards');
+  var skeletons = $('#skeletons');
+  var emptyState = $('#emptyState');
+  var filters = $all('.filter');
+  var tabs = $all('.tab');
 
-  var overlay = document.getElementById('overlay');
-  var details = document.getElementById('details');
-  var closeBtn = document.getElementById('closeBtn');
-  var detailsTitle = document.getElementById('detailsTitle');
-  var scheduleList = document.getElementById('scheduleList');
+  var overlay = $('#overlay');
+  var details = $('#details');
+  var closeBtn = $('#closeBtn');
+  var detailsTitle = $('#detailsTitle');
+  var scheduleList = $('#scheduleList');
+  var todayBtn = $('#todayBtn');
+  var resetFilters = $('#resetFilters');
+  var scrollTopBtn = $('#scrollTop');
+  var snackbar = $('#snackbar');
 
-  // ===== Рендер карточек =====
+  // ===== Render =====
   function renderCards(list){
-    cardsContainer.innerHTML = '';
+    cardsWrap.innerHTML = '';
     for (var i=0;i<list.length;i++){
       var a = list[i];
       var card = document.createElement('button');
       card.type = 'button';
       card.className = 'card ' + a.type;
       card.setAttribute('data-index', String(i));
-      // Структура карточки: заголовок (дата) + подзаголовок (активность)
-      card.innerHTML = '<div class="card-header">'+(i+1)+'. '+a.date+'</div><div class="card-body">'+a.text+'</div>';
-      cardsContainer.appendChild(card);
+      card.innerHTML =
+        '<div class="card-header">'+ (i+1) +'. '+ a.date +'</div>' +
+        '<div class="card-body">'+ a.text +'</div>';
+      cardsWrap.appendChild(card);
     }
-    cardsContainer.setAttribute('aria-busy','false');
+    cardsWrap.classList.remove('hidden');
+    cardsWrap.setAttribute('aria-busy','false');
+    skeletons.classList.add('hidden');
   }
-  renderCards(activities);
+  // имитация небольшой задержки загрузки для показа скелетона
+  setTimeout(function(){ renderCards(activities); }, 120);
 
-  // ===== Вкладки =====
+  // ===== Tabs =====
   function showTab(id){
+    var panels = $all('.tab-content');
     for (var i=0;i<panels.length;i++) panels[i].classList.add('hidden');
     var p = document.getElementById(id); if (p) p.classList.remove('hidden');
     for (var j=0;j<tabs.length;j++) tabs[j].classList.toggle('active', tabs[j].dataset.tab===id);
   }
   for (var t=0;t<tabs.length;t++){
-    (function(btn){
-      btn.addEventListener('click', function(){ showTab(btn.dataset.tab); });
-      btn.addEventListener('touchstart', function(){ showTab(btn.dataset.tab); }, {passive:true});
-    })(tabs[t]);
+    (function(btn){ on(btn,'click',function(){ showTab(btn.dataset.tab); }); on(btn,'touchstart',function(){ showTab(btn.dataset.tab); },{passive:true}); })(tabs[t]);
   }
 
-  // ===== Фильтры =====
+  // ===== Filters =====
   function applyFilter(type){
-    for (var f=0;f<filters.length;f++){
-      var active = (filters[f].dataset.filter===type) || (type==='all' && filters[f].dataset.filter==='all');
-      filters[f].classList.toggle('active', active);
-      filters[f].setAttribute('aria-pressed', active ? 'true' : 'false');
+    for (var i=0;i<filters.length;i++){
+      var active = (filters[i].dataset.filter===type) || (type==='all' && filters[i].dataset.filter==='all');
+      filters[i].classList.toggle('active', active);
+      filters[i].setAttribute('aria-pressed', active ? 'true':'false');
     }
-    var cards = document.querySelectorAll('.card');
+    var cards = $all('.card');
+    var visible = 0;
     for (var k=0;k<cards.length;k++){
       var show = (type==='all' || cards[k].classList.contains(type));
       cards[k].style.display = show ? 'flex' : 'none';
+      if (show) visible++;
     }
+    emptyState.classList.toggle('hidden', visible>0);
   }
-  for (var i=0;i<filters.length;i++){
-    (function(btn){
-      var type = btn.dataset.filter;
-      btn.addEventListener('click', function(){ applyFilter(type); });
-      btn.addEventListener('touchstart', function(){ applyFilter(type); }, {passive:true});
-    })(filters[i]);
+  for (var f=0;f<filters.length;f++){
+    (function(btn){ var type=btn.dataset.filter; on(btn,'click',function(){ applyFilter(type); }); on(btn,'touchstart',function(){ applyFilter(type); },{passive:true}); })(filters[f]);
   }
+  on(resetFilters,'click',function(){ applyFilter('all'); showToast('Фильтры сброшены'); });
 
-  // ===== Модалка с расписанием =====
+  // ===== Dialog (Schedule) =====
   function openDetails(idx){
     var act = activities[idx]; if (!act) return;
-    detailsTitle.textContent = 'День '+(idx+1)+' • '+act.date;
+    detailsTitle.textContent = 'День '+ (idx+1) +' • '+ act.date;
     scheduleList.innerHTML = '';
 
     var rows = ['09:00 — Выход из дома'];
@@ -139,7 +150,7 @@
       rows.push('14:00–17:00 — Пляж '+loc);
       rows.push('17:00–18:00 — Возвращение домой');
     } else {
-      var parts = act.text.split(' +'); var main = parts[0]; var sub = parts[1] || 'ближайшая локация';
+      var parts = act.text.split(' +'); var main=parts[0]; var sub=parts[1]||'ближайшая локация';
       rows.push('10:00–12:00 — Посещение '+main);
       rows.push('12:00–13:00 — Обед');
       rows.push('13:00–15:00 — Прогулка в '+sub);
@@ -149,28 +160,55 @@
     for (var r=0;r<rows.length;r++){ var li=document.createElement('li'); li.textContent=rows[r]; scheduleList.appendChild(li); }
 
     overlay.classList.remove('hidden'); details.classList.remove('hidden');
-    overlay.style.display='block'; details.style.display='block'; overlay.setAttribute('aria-hidden','false');
+    overlay.style.display='block'; details.style.display='block';
+    overlay.setAttribute('aria-hidden','false');
   }
   function closeDetails(){
     overlay.classList.add('hidden'); details.classList.add('hidden');
-    overlay.style.display='none'; details.style.display='none'; overlay.setAttribute('aria-hidden','true');
+    overlay.style.display='none'; details.style.display='none';
+    overlay.setAttribute('aria-hidden','true');
+  }
+  on(overlay,'click',closeDetails);
+  on(closeBtn,'click',closeDetails);
+
+  on(cardsWrap,'click',function(e){
+    var card = e.target.closest ? e.target.closest('.card') : null;
+    if (!card) return;
+    openDetails(Number(card.getAttribute('data-index')));
+  });
+  on(cardsWrap,'touchstart',function(e){
+    var card = e.target.closest ? e.target.closest('.card') : null;
+    if (!card) return;
+    openDetails(Number(card.getAttribute('data-index')));
+  },{passive:true});
+
+  // ===== Today quick filter (ищем ближайший будущий день) =====
+  on(todayBtn,'click',function(){
+    // упрощенно: подсветим первую карточку типа 'sea' как пример "сегодня"
+    var first = $('.card');
+    if (first){ first.scrollIntoView({behavior:'smooth', block:'center'}); pulse(first); }
+  });
+
+  // ===== Scroll to top FAB =====
+  on(scrollTopBtn,'click',function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+
+  // ===== Micro-interaction helpers =====
+  function pulse(el){
+    if (!el) return;
+    el.style.filter='brightness(1.08)';
+    setTimeout(function(){ el.style.filter=''; }, 600);
   }
 
-  if (cardsContainer){
-    cardsContainer.addEventListener('click', function(e){
-      var card = e.target.closest ? e.target.closest('.card') : null;
-      if (!card) return;
-      openDetails(Number(card.getAttribute('data-index')));
-    });
-    cardsContainer.addEventListener('touchstart', function(e){
-      var card = e.target.closest ? e.target.closest('.card') : null;
-      if (!card) return;
-      openDetails(Number(card.getAttribute('data-index')));
-    }, {passive:true});
+  // ===== Snackbar =====
+  var hideToastTimer;
+  function showToast(text){
+    if (!snackbar) return;
+    snackbar.textContent = text;
+    snackbar.classList.add('show');
+    clearTimeout(hideToastTimer);
+    hideToastTimer = setTimeout(function(){ snackbar.classList.remove('show'); }, 1800);
   }
-  if (overlay) overlay.addEventListener('click', closeDetails);
-  if (closeBtn) closeBtn.addEventListener('click', closeDetails);
 
-  // По умолчанию — вкладка "Календарь"
+  // стартовая вкладка
   showTab('calendar');
 })();
