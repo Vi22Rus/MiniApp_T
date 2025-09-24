@@ -4,117 +4,73 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Планер Паттайя</title>
-  <style>
-    body { margin:0; font-family:Arial,sans-serif; background:#f8f8f8; }
-    .tabs { display:flex; background:#fff; }
-    .tab { flex:1; text-align:center; padding:12px; cursor:pointer; }
-    .tab.active { border-bottom:3px solid #007bff; font-weight:bold; }
-    .content { padding:16px; }
-    .hidden { display:none; }
-    .filters { display:flex; gap:8px; margin-bottom:12px; }
-    .filters button { padding:8px 12px; border:none; border-radius:4px; background:#ddd; cursor:pointer; }
-    .filters button.active { background:#007bff; color:#fff; }
-    .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
-    .card { padding:8px; border-radius:6px; color:#fff; cursor:pointer; text-align:center; }
-    .sea { background:#4db6e1; }
-    .sight { background:#ffa726; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="tabs">
-    <div class="tab active" data-tab="calendar">Календарь</div>
-    <div class="tab" data-tab="tips">Советы</div>
-    <div class="tab" data-tab="contacts">Контакты</div>
+    <button class="tab active" data-tab="calendar">📅 Календарь</button>
+    <button class="tab" data-tab="tips">💡 Советы</button>
+    <button class="tab" data-tab="contacts">📇 Контакты</button>
   </div>
+
   <div class="content">
-    <div id="calendar">
+    <section id="calendar" class="tab-content">
       <div class="filters">
-        <button class="active" data-filter="all">Все</button>
-        <button data-filter="sea">Море</button>
-        <button data-filter="sight">Достопримеч.</button>
+        <button class="filter active" data-filter="all">🔄 Все</button>
+        <button class="filter" data-filter="sea">🌊 Море</button>
+        <button class="filter" data-filter="sight">🏛️ Достопримеч.</button>
       </div>
       <div class="cards"></div>
-    </div>
-    <div id="tips" class="hidden">
-      <h3>Советы по поездке</h3>
+    </section>
+
+    <section id="tips" class="tab-content hidden">
+      <h2>💡 Полезная информация</h2>
+      <div class="section" id="travel-tips">
+        <h3>Советы по поездке</h3>
+        <ul>
+          <li>💧 Не забывайте воду и солнцезащитный крем.</li>
+          <li>👗 Для храмов необходима закрытая одежда.</li>
+          <li>⏱️ Запланируйте поездки на острова заранее.</li>
+          <li>🐠 Лучшее время для снорклинга — до 11:00.</li>
+          <li>👟 Удобная обувь для прогулок в садах Нонг Нуч.</li>
+        </ul>
+      </div>
+      <div class="section" id="must-try">
+        <h3>Обязательно попробовать</h3>
+        <ul>
+          <li>🥘 Phanaeng Curry</li>
+          <li>🍜 Khao Soi</li>
+          <li>🥣 Massaman Curry</li>
+          <li>🥥 Tom Kha Gai</li>
+          <li>🍗 Kai Yang</li>
+          <li>🌿 Phat Kaphrao</li>
+          <li>🍝 Pad Thai</li>
+          <li>🥭 Khao Niao Mamuang</li>
+          <li>🥗 Som Tam</li>
+          <li>🍲 Tom Yum Goong</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="contacts" class="tab-content hidden">
+      <h2>📇 Контакты</h2>
       <ul>
-        <li>Не забывайте воду и солнцезащитный крем.</li>
-        <li>Для храмов необходима закрытая одежда.</li>
-        <li>Планируйте поездки заранее.</li>
-        <li>Снорклинг до 11:00 утра.</li>
-        <li>Удобная обувь для садов Нонг Нуч.</li>
+        <li>🏠 Club Royal Condominium (12.969175,100.888124)</li>
+        <li>📞 Туристический офис: +66 38 253 000</li>
+        <li>🚕 Такси: +66 98 771 7100</li>
+        <li>🏥 Pattaya Memorial Hospital: +66 38 428 428</li>
+        <li>🚨 Экстренные службы: 1155</li>
       </ul>
-      <h3>Обязательно попробовать</h3>
-      <ul>
-        <li>Phanaeng Curry</li>
-        <li>Khao Soi</li>
-        <li>Massaman Curry</li>
-        <li>Tom Kha Gai</li>
-        <li>Kai Yang</li>
-        <li>Phat Kaphrao</li>
-        <li>Pad Thai</li>
-        <li>Khao Niao Mamuang</li>
-        <li>Som Tam</li>
-        <li>Tom Yum Goong</li>
-      </ul>
-    </div>
-    <div id="contacts" class="hidden">
-      <ul>
-        <li>Club Royal Condominium</li>
-        <li>Турофис: +66 38 253 000</li>
-        <li>Такси: +66 98 771 7100</li>
-        <li>Hospital: +66 38 428 428</li>
-        <li>Экстренные: 1155</li>
-      </ul>
-    </div>
+    </section>
   </div>
-  <script>
-    document.addEventListener('DOMContentLoaded',()=>{
-      const activities=[
-        {type:'sea',date:'29.12.2025'}, {type:'sea',date:'30.12.2025'},
-        {type:'sight',date:'31.12.2025'},{type:'sea',date:'01.01.2026'},
-        {type:'sea',date:'02.01.2026'},{type:'sight',date:'03.01.2026'},
-        {type:'sea',date:'04.01.2026'},{type:'sea',date:'05.01.2026'},
-        {type:'sight',date:'06.01.2026'},{type:'sea',date:'07.01.2026'},
-        {type:'sea',date:'08.01.2026'},{type:'sight',date:'09.01.2026'},
-        {type:'sea',date:'10.01.2026'},{type:'sight',date:'11.01.2026'},
-        {type:'sight',date:'12.01.2026'},{type:'sea',date:'13.01.2026'},
-        {type:'sea',date:'14.01.2026'},{type:'sight',date:'15.01.2026'},
-        {type:'sea',date:'16.01.2026'},{type:'sea',date:'17.01.2026'},
-        {type:'sight',date:'18.01.2026'},{type:'sea',date:'19.01.2026'},
-        {type:'sea',date:'20.01.2026'},{type:'sight',date:'21.01.2026'},
-        {type:'sea',date:'22.01.2026'},{type:'sea',date:'23.01.2026'},
-        {type:'sight',date:'24.01.2026'},{type:'sea',date:'25.01.2026'}
-      ];
-      const cards=document.querySelector('.cards');
-      activities.forEach((a,i)=>{
-        const d=document.createElement('div');
-        d.className=`card ${a.type}`;
-        d.innerText=`${i+1}. ${a.date}`;
-        cards.append(d);
-      });
-      document.querySelectorAll('.tab').forEach(tab=>{
-        tab.onclick=()=>{
-          document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-          tab.classList.add('active');
-          ['calendar','tips','contacts'].forEach(id=>{
-            document.getElementById(id).classList.add('hidden');
-          });
-          document.getElementById(tab.dataset.tab).classList.remove('hidden');
-        };
-      });
-      document.querySelectorAll('.filters button').forEach(btn=>{
-        btn.onclick=()=>{
-          document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
-          btn.classList.add('active');
-          const f=btn.dataset.filter;
-          document.querySelectorAll('.card').forEach(c=>{
-            c.style.display=(f==='all'||c.classList.contains(f))?'block':'none';
-          });
-        };
-      });
-      if(window.Telegram?.WebApp)Telegram.WebApp.ready();
-    });
-  </script>
+
+  <div id="overlay" class="overlay hidden"></div>
+  <div id="details" class="details hidden">
+    <button id="closeBtn" class="close-btn">✖️</button>
+    <h3>🕒 <span id="detailsTitle"></span></h3>
+    <ul id="scheduleList"></ul>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
