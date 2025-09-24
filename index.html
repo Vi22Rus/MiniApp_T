@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Планер Паттайя</title>
   <style>
-    body { margin:0; font-family: Arial, sans-serif; }
-    .tabs { display:flex; background:#f0f0f0; }
+    body { margin:0; font-family: Arial, sans-serif; background:#f8f8f8; }
+    .tabs { display:flex; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
     .tab { flex:1; text-align:center; padding:12px; cursor:pointer; }
-    .tab.active { background:#fff; border-bottom:2px solid #007bff; }
+    .tab.active { border-bottom:3px solid #007bff; font-weight:bold; }
     .content { padding:16px; }
     .hidden { display:none; }
-    table { width:100%; border-collapse:collapse; }
-    table th, table td { border:1px solid #ddd; padding:8px; text-align:center; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+    .card { background:#fff; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); padding:12px; }
+    .card h3 { margin:0 0 8px; font-size:16px; color:#007bff; }
+    .card p { margin:0; font-size:14px; color:#333; }
     ul { padding-left:20px; }
     ul li { margin-bottom:8px; }
   </style>
@@ -28,42 +30,36 @@
   <div class="content">
     <!-- Календарь -->
     <div id="calendar" class="tab-content">
-      <h2>План на 28 дней</h2>
-      <table>
-        <thead>
-          <tr><th>День</th><th>Дата</th><th>Активность</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>1</td><td>29.12.2025</td><td>Пляж Джомтьен + детская игровая зона</td></tr>
-          <tr><td>2</td><td>30.12.2025</td><td>Пляж Вонгамат + водные горки</td></tr>
-          <tr><td>3</td><td>31.12.2025</td><td>Ват Янсангварам + прогулка по парку</td></tr>
-          <tr><td>4</td><td>01.01.2026</td><td>Пляж Паттайя + аквариум Underwater World</td></tr>
-          <tr><td>5</td><td>02.01.2026</td><td>Морская прогулка к Ко Лан (снорклинг)</td></tr>
-          <tr><td>6</td><td>03.01.2026</td><td>Сад Нонг Нуч + шоу слонов</td></tr>
-          <tr><td>7</td><td>04.01.2026</td><td>Пляж Джомтьен</td></tr>
-          <tr><td>8</td><td>05.01.2026</td><td>Пляж Вонгамат + аренда детского байка</td></tr>
-          <tr><td>9</td><td>06.01.2026</td><td>Ват Кхао Пхра Бат + обзорная площадка</td></tr>
-          <tr><td>10</td><td>07.01.2026</td><td>Морская прогулка к Ко Сичанг + пляжный парк</td></tr>
-          <tr><td>11</td><td>08.01.2026</td><td>Пляж Паттайя</td></tr>
-          <tr><td>12</td><td>09.01.2026</td><td>Dolphin World + детская зона</td></tr>
-          <tr><td>13</td><td>10.01.2026</td><td>Пляж Джомтьен</td></tr>
-          <tr><td>14</td><td>11.01.2026</td><td>Батискаф у клуба (координаты 12.969175,100.888124)</td></tr>
-          <tr><td>15</td><td>12.01.2026</td><td>Art in Paradise + Плавучий рынок</td></tr>
-          <tr><td>16</td><td>13.01.2026</td><td>Пляж Вонгамат</td></tr>
-          <tr><td>17</td><td>14.01.2026</td><td>Пляж Паттайя</td></tr>
-          <tr><td>18</td><td>15.01.2026</td><td>Мини-Сиам + детские аттракционы</td></tr>
-          <tr><td>19</td><td>16.01.2026</td><td>Морская прогулка к Ко Лан</td></tr>
-          <tr><td>20</td><td>17.01.2026</td><td>Пляж Джомтьен</td></tr>
-          <tr><td>21</td><td>18.01.2026</td><td>Sea Life Pattaya (аквариум)</td></tr>
-          <tr><td>22</td><td>19.01.2026</td><td>Пляж Вонгамат</td></tr>
-          <tr><td>23</td><td>20.01.2026</td><td>Пляж Паттайя</td></tr>
-          <tr><td>24</td><td>21.01.2026</td><td>Ват Пхра Яй + парк Люксор</td></tr>
-          <tr><td>25</td><td>22.01.2026</td><td>Пляж Джомтьен</td></tr>
-          <tr><td>26</td><td>23.01.2026</td><td>Пляж Вонгамат</td></tr>
-          <tr><td>27</td><td>24.01.2026</td><td>Central Festival + фуд-корт</td></tr>
-          <tr><td>28</td><td>25.01.2026</td><td>Пляж Паттайя</td></tr>
-        </tbody>
-      </table>
+      <div class="cards">
+        <div class="card"><h3>День 1<br>29.12.2025</h3><p>Пляж Джомтьен + детская игровая зона</p></div>
+        <div class="card"><h3>День 2<br>30.12.2025</h3><p>Пляж Вонгамат + водные горки</p></div>
+        <div class="card"><h3>День 3<br>31.12.2025</h3><p>Ват Янсангварам + прогулка по парку</p></div>
+        <div class="card"><h3>День 4<br>01.01.2026</h3><p>Пляж Паттайя + аквариум Underwater World</p></div>
+        <div class="card"><h3>День 5<br>02.01.2026</h3><p>Морская прогулка к Ко Лан (снорклинг)</p></div>
+        <div class="card"><h3>День 6<br>03.01.2026</h3><p>Сад Нонг Нуч + шоу слонов</p></div>
+        <div class="card"><h3>День 7<br>04.01.2026</h3><p>Пляж Джомтьен</p></div>
+        <div class="card"><h3>День 8<br>05.01.2026</h3><p>Пляж Вонгамат + аренда детского байка</p></div>
+        <div class="card"><h3>День 9<br>06.01.2026</h3><p>Ват Кхао Пхра Бат + обзорная площадка</p></div>
+        <div class="card"><h3>День 10<br>07.01.2026</h3><p>Морская прогулка к Ко Сичанг + пляжный парк</p></div>
+        <div class="card"><h3>День 11<br>08.01.2026</h3><p>Пляж Паттайя</p></div>
+        <div class="card"><h3>День 12<br>09.01.2026</h3><p>Dolphin World + детская зона</p></div>
+        <div class="card"><h3>День 13<br>10.01.2026</h3><p>Пляж Джомтьен</p></div>
+        <div class="card"><h3>День 14<br>11.01.2026</h3><p>Батискаф (12.969175,100.888124)</p></div>
+        <div class="card"><h3>День 15<br>12.01.2026</h3><p>Art in Paradise + Плавучий рынок</p></div>
+        <div class="card"><h3>День 16<br>13.01.2026</h3><p>Пляж Вонгамат</p></div>
+        <div class="card"><h3>День 17<br>14.01.2026</h3><p>Пляж Паттайя</p></div>
+        <div class="card"><h3>День 18<br>15.01.2026</h3><p>Мини-Сиам + детские аттракционы</p></div>
+        <div class="card"><h3>День 19<br>16.01.2026</h3><p>Морская прогулка к Ко Лан</p></div>
+        <div class="card"><h3>День 20<br>17.01.2026</h3><p>Пляж Джомтьен</p></div>
+        <div class="card"><h3>День 21<br>18.01.2026</h3><p>Sea Life Pattaya (аквариум)</p></div>
+        <div class="card"><h3>День 22<br>19.01.2026</h3><p>Пляж Вонгамат</p></div>
+        <div class="card"><h3>День 23<br>20.01.2026</h3><p>Пляж Паттайя</p></div>
+        <div class="card"><h3>День 24<br>21.01.2026</h3><p>Ват Пхра Яй + парк Люксор</p></div>
+        <div class="card"><h3>День 25<br>22.01.2026</h3><p>Пляж Джомтьен</p></div>
+        <div class="card"><h3>День 26<br>23.01.2026</h3><p>Пляж Вонгамат</p></div>
+        <div class="card"><h3>День 27<br>24.01.2026</h3><p>Central Festival + фуд-корт</p></div>
+        <div class="card"><h3>День 28<br>25.01.2026</h3><p>Пляж Паттайя</p></div>
+      </div>
     </div>
 
     <!-- Советы -->
@@ -92,22 +88,16 @@
   </div>
 
   <script>
-    // Переключение вкладок
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
         tab.classList.add('active');
         const target = tab.dataset.tab;
-        document.querySelectorAll('.tab-content').forEach(c=>{
-          c.id===target ? c.classList.remove('hidden') : c.classList.add('hidden');
-        });
+        document.querySelectorAll('.tab-content')
+          .forEach(c=>c.id===target?c.classList.remove('hidden'):c.classList.add('hidden'));
       });
     });
-
-    // Инициализация Telegram WebApp
-    if (window.Telegram?.WebApp) {
-      Telegram.WebApp.ready();
-    }
+    if (window.Telegram?.WebApp) Telegram.WebApp.ready();
   </script>
 
 </body>
