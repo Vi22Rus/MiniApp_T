@@ -1,26 +1,36 @@
 (function(){
   'use strict';
 
-  // Простейший вывод ошибок в UI (консоль в WebView не видна)
-  function showError(msg){
-    var box = document.getElementById('debug');
-    if(!box) return;
-    box.classList.remove('hidden');
-    box.textContent = String(msg);
-  }
-  window.onerror = function(msg, src, line, col, err){ showError('JS error: ' + msg); };
-  window.addEventListener('unhandledrejection', function(e){ showError('Promise error: ' + e.reason); });
-
-  // Версия UI
+  // ===== Версия в UI =====
   var ver = (document.body && document.body.dataset && document.body.dataset.version) ? document.body.dataset.version : 'dev';
   var verEl = document.getElementById('appVersion');
   if (verEl) verEl.textContent = 'v' + ver;
 
-  // Инициализация Telegram Mini App
+  // ===== Telegram SDK =====
   var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-  if (tg){ if (typeof tg.expand === 'function') tg.expand(); if (typeof tg.ready === 'function') tg.ready(); } // ready/expand по рекомендациям
+  if (tg) { if (typeof tg.expand === 'function') tg.expand(); if (typeof tg.ready === 'function') tg.ready(); }
 
-  // Данные на 28 дней
+  // Применение темы Telegram к CSS custom properties
+  function applyTheme() {
+    if (!tg || !tg.themeParams) return;
+    var p = tg.themeParams;
+    // Базовые
+    if (p.bg_color)    document.documentElement.style.setProperty('--tg-bg', p.bg_color);
+    if (p.text_color)  document.documentElement.style.setProperty('--tg-text', p.text_color);
+    if (p.hint_color)  document.documentElement.style.setProperty('--tg-subtle', p.hint_color);
+    // Акцентные
+    if (p.button_color) document.documentElement.style.setProperty('--tg-accent', p.button_color);
+    // Цвета карточек можно подмешать к акценту при тёмной теме
+    if (p.secondary_bg_color) {
+      document.documentElement.style.setProperty('--tg-card-sea', p.secondary_bg_color);
+    }
+  }
+  applyTheme();
+  if (tg && typeof tg.onEvent === 'function') {
+    tg.onEvent('themeChanged', function(){ applyTheme(); });
+  }
+
+  // ===== Данные =====
   var activities = [
     { type:'sea',   date:'29.12.2025', text:'Пляж Джомтьен + детская зона' },
     { type:'sea',   date:'30.12.2025', text:'Пляж Вонгамат + водные горки' },
@@ -52,7 +62,7 @@
     { type:'sea',   date:'25.01.2026', text:'Пляж Паттайя' }
   ];
 
-  // DOM
+  // ===== DOM =====
   var cardsContainer = document.querySelector('.cards');
   var tabs = document.querySelectorAll('.tab');
   var panels = document.querySelectorAll('.tab-content');
@@ -64,29 +74,28 @@
   var detailsTitle = document.getElementById('detailsTitle');
   var scheduleList = document.getElementById('scheduleList');
 
-  // Рендер карточек
+  // ===== Рендер карточек =====
   function renderCards(list){
-    if(!cardsContainer){ showError('Не найден контейнер карточек .cards'); return; }
     cardsContainer.innerHTML = '';
-    for (var i=0; i<list.length; i++){
+    for (var i=0;i<list.length;i++){
       var a = list[i];
       var card = document.createElement('button');
       card.type = 'button';
       card.className = 'card ' + a.type;
       card.setAttribute('data-index', String(i));
+      // Структура карточки: заголовок (дата) + подзаголовок (активность)
       card.innerHTML = '<div class="card-header">'+(i+1)+'. '+a.date+'</div><div class="card-body">'+a.text+'</div>';
       cardsContainer.appendChild(card);
     }
-    cardsContainer.setAttribute('aria-busy', 'false');
+    cardsContainer.setAttribute('aria-busy','false');
   }
   renderCards(activities);
 
-  // Вкладки
+  // ===== Вкладки =====
   function showTab(id){
-    for (var i=0;i<panels.length;i++){ panels[i].classList.add('hidden'); }
-    var p = document.getElementById(id);
-    if (p) p.classList.remove('hidden');
-    for (var j=0;j<tabs.length;j++){ tabs[j].classList.toggle('active', tabs[j].dataset.tab===id); }
+    for (var i=0;i<panels.length;i++) panels[i].classList.add('hidden');
+    var p = document.getElementById(id); if (p) p.classList.remove('hidden');
+    for (var j=0;j<tabs.length;j++) tabs[j].classList.toggle('active', tabs[j].dataset.tab===id);
   }
   for (var t=0;t<tabs.length;t++){
     (function(btn){
@@ -95,11 +104,12 @@
     })(tabs[t]);
   }
 
-  // Фильтры
+  // ===== Фильтры =====
   function applyFilter(type){
     for (var f=0;f<filters.length;f++){
-      var isActive = (filters[f].dataset.filter===type) || (type==='all' && filters[f].dataset.filter==='all');
-      filters[f].classList.toggle('active', isActive);
+      var active = (filters[f].dataset.filter===type) || (type==='all' && filters[f].dataset.filter==='all');
+      filters[f].classList.toggle('active', active);
+      filters[f].setAttribute('aria-pressed', active ? 'true' : 'false');
     }
     var cards = document.querySelectorAll('.card');
     for (var k=0;k<cards.length;k++){
@@ -115,12 +125,12 @@
     })(filters[i]);
   }
 
-  // Модалка с расписанием
+  // ===== Модалка с расписанием =====
   function openDetails(idx){
-    var act = activities[idx];
-    if(!act) return;
+    var act = activities[idx]; if (!act) return;
     detailsTitle.textContent = 'День '+(idx+1)+' • '+act.date;
     scheduleList.innerHTML = '';
+
     var rows = ['09:00 — Выход из дома'];
     if (act.type==='sea'){
       var loc = act.text.split(' +')[0];
@@ -129,8 +139,7 @@
       rows.push('14:00–17:00 — Пляж '+loc);
       rows.push('17:00–18:00 — Возвращение домой');
     } else {
-      var parts = act.text.split(' +');
-      var main = parts[0], sub = parts[1] || 'ближайшая локация';
+      var parts = act.text.split(' +'); var main = parts[0]; var sub = parts[1] || 'ближайшая локация';
       rows.push('10:00–12:00 — Посещение '+main);
       rows.push('12:00–13:00 — Обед');
       rows.push('13:00–15:00 — Прогулка в '+sub);
@@ -140,13 +149,11 @@
     for (var r=0;r<rows.length;r++){ var li=document.createElement('li'); li.textContent=rows[r]; scheduleList.appendChild(li); }
 
     overlay.classList.remove('hidden'); details.classList.remove('hidden');
-    overlay.style.display='block'; details.style.display='block';
-    overlay.setAttribute('aria-hidden','false');
+    overlay.style.display='block'; details.style.display='block'; overlay.setAttribute('aria-hidden','false');
   }
   function closeDetails(){
     overlay.classList.add('hidden'); details.classList.add('hidden');
-    overlay.style.display='none'; details.style.display='none';
-    overlay.setAttribute('aria-hidden','true');
+    overlay.style.display='none'; details.style.display='none'; overlay.setAttribute('aria-hidden','true');
   }
 
   if (cardsContainer){
@@ -156,13 +163,11 @@
       openDetails(Number(card.getAttribute('data-index')));
     });
     cardsContainer.addEventListener('touchstart', function(e){
-      var target = e.target;
-      var card = target.closest ? target.closest('.card') : null;
+      var card = e.target.closest ? e.target.closest('.card') : null;
       if (!card) return;
       openDetails(Number(card.getAttribute('data-index')));
     }, {passive:true});
   }
-
   if (overlay) overlay.addEventListener('click', closeDetails);
   if (closeBtn) closeBtn.addEventListener('click', closeDetails);
 
