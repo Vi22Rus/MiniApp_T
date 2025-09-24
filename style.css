@@ -55,6 +55,13 @@ body {
   text-align: center;
   cursor: pointer;
 }
+.card-header {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.card-body {
+  font-size: 14px;
+}
 .sea {
   background: #4db6e1;
 }
@@ -103,4 +110,3 @@ body {
   position: absolute;
   left: 0; top: 0;
 }
-
