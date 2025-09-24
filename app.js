@@ -1,40 +1,32 @@
 (function(){
   'use strict';
 
-  // ===== Utilities =====
+  // ---------- Helpers ----------
   function $(sel, root){ return (root||document).querySelector(sel); }
   function $all(sel, root){ return (root||document).querySelectorAll(sel); }
   function on(el, evt, cb, opt){ el && el.addEventListener(evt, cb, opt||false); }
 
-  // ===== Version in UI =====
+  // Версия
   var ver = (document.body && document.body.dataset && document.body.dataset.version) ? document.body.dataset.version : 'dev';
   var verEl = $('#appVersion'); if (verEl) verEl.textContent = 'v' + ver;
 
-  // ===== Telegram SDK & Theming =====
+  // Telegram SDK (инициализация/теминг)
   var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
   if (tg){ if (typeof tg.expand==='function') tg.expand(); if (typeof tg.ready==='function') tg.ready(); }
 
   function applyTheme(){
     if (!tg || !tg.themeParams) return;
     var p = tg.themeParams;
-
-    // base
     if (p.bg_color)      document.documentElement.style.setProperty('--bg', p.bg_color);
     if (p.text_color)    document.documentElement.style.setProperty('--text', p.text_color);
     if (p.hint_color)    document.documentElement.style.setProperty('--muted', p.hint_color);
     if (p.button_color)  document.documentElement.style.setProperty('--accent', p.button_color);
-    if (p.button_text_color) document.documentElement.style.setProperty('--accent-2', p.button_text_color); // контраст/доп. оттенок
-
-    // оттенки карточек при темных темах — легкий сдвиг
-    if (p.secondary_bg_color){
-      document.documentElement.style.setProperty('--surface', 'rgba(255,255,255,0.06)');
-      document.documentElement.style.setProperty('--glass', 'rgba(255,255,255,0.08)');
-    }
+    if (p.button_text_color) document.documentElement.style.setProperty('--accent-2', p.button_text_color);
   }
   applyTheme();
   if (tg && typeof tg.onEvent==='function') tg.onEvent('themeChanged', function(){ applyTheme(); });
 
-  // ===== Data (28 дней) =====
+  // ---------- Data (28 дней) ----------
   var activities = [
     { type:'sea',   date:'29.12.2025', text:'Пляж Джомтьен + детская зона' },
     { type:'sea',   date:'30.12.2025', text:'Пляж Вонгамат + водные горки' },
@@ -66,7 +58,7 @@
     { type:'sea',   date:'25.01.2026', text:'Пляж Паттайя' }
   ];
 
-  // ===== DOM =====
+  // ---------- DOM ----------
   var cardsWrap = $('.cards');
   var skeletons = $('#skeletons');
   var emptyState = $('#emptyState');
@@ -83,7 +75,75 @@
   var scrollTopBtn = $('#scrollTop');
   var snackbar = $('#snackbar');
 
-  // ===== Render =====
+  // ---------- Schedule generator (реалистичные интервалы) ----------
+  function add(hh, mm, addMin){
+    var d = new Date(2000,0,1, hh, mm, 0);
+    d.setMinutes(d.getMinutes()+addMin);
+    return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+  }
+  function t(s){ var a=s.split(':'); return {h:+a[0], m:+a[1]}; }
+
+  function generateSchedule(act){
+    var departAt = '09:00';    // фиксированный выход
+    var travelSea = 40;        // дорога к морю, мин (кастомизируется)
+    var travelSight = 30;      // дорога к достопримеч., мин (кастомизируется)
+    var buf = 10;              // универсальная подушка, мин
+
+    var rows = [];
+    rows.push(departAt+' — Выход из дома (вода 1 л/чел., SPF 50+, шляпы, наличные)');
+    var trvl = (act.type==='sea') ? travelSea : travelSight;
+    var arr1 = add(t(departAt).h, t(departAt).m, trvl);
+    rows.push(departAt+'–'+arr1+' — Дорога ('+trvl+' мин)');
+
+    if (act.type==='sea'){
+      var loc = act.text.split(' +')[0];
+
+      var startSea = add(t(arr1).h, t(arr1).m, buf);
+      var endSea1  = add(t(startSea).h, t(startSea).m, 150);
+      rows.push(startSea+'–'+endSea1+' — Пляж '+loc+' (тень/зонт, купание, перекус, SPF каждые 2 ч)');
+
+      var startLunch = add(t(endSea1).h, t(endSea1).m, buf);
+      var endLunch   = add(t(startLunch).h, t(startLunch).m, 60);
+      rows.push(startLunch+'–'+endLunch+' — Обед рядом (кондиционер, пополнить воду)');
+
+      var startSiesta = add(t(endLunch).h, t(endLunch).m, buf);
+      var endSiesta   = add(t(startSiesta).h, t(startSiesta).m, 60);
+      rows.push(startSiesta+'–'+endSiesta+' — Отдых в тени/индор‑зона');
+
+      var startSea2 = add(t(endSiesta).h, t(endSiesta).m, buf);
+      var endSea2   = add(t(startSea2).h, t(startSea2).m, 120);
+      rows.push(startSea2+'–'+endSea2+' — Пляж '+loc+' (закат/фото/прогулка)');
+
+      var startBack = add(t(endSea2).h, t(endSea2).m, buf);
+      var endBack   = add(t(startBack).h, t(startBack).m, trvl);
+      rows.push(startBack+'–'+endBack+' — Дорога домой ('+trvl+' мин)');
+      rows.push(endBack+' — Душ/ужин/подготовка на завтра');
+    } else {
+      var parts = act.text.split(' +');
+      var main = parts[0];
+      var sub  = parts[1] || 'ближайшая локация';
+
+      var startMain = add(t(arr1).h, t(arr1).m, buf);
+      var endMain   = add(t(startMain).h, t(startMain).m, 120);
+      rows.push(startMain+'–'+endMain+' — '+main+' (билеты/скан, дресс‑код, аудиогид)');
+
+      var startLunchS = add(t(endMain).h, t(endMain).m, buf);
+      var endLunchS   = add(t(startLunchS).h, t(startLunchS).m, 60);
+      rows.push(startLunchS+'–'+endLunchS+' — Обед поблизости (пополнить воду)');
+
+      var startSub = add(t(endLunchS).h, t(endLunchS).m, buf);
+      var endSub   = add(t(startSub).h, t(startSub).m, 120);
+      rows.push(startSub+'–'+endSub+' — '+sub+' (прогулка/детская зона/фото)');
+
+      var startBackS = add(t(endSub).h, t(endSub).m, buf);
+      var endBackS   = add(t(startBackS).h, t(startBackS).m, trvl);
+      rows.push(startBackS+'–'+endBackS+' — Дорога домой ('+trvl+' мин)');
+      rows.push(endBackS+' — Душ/ужин/подготовка на завтра');
+    }
+    return rows;
+  }
+
+  // ---------- Render cards ----------
   function renderCards(list){
     cardsWrap.innerHTML = '';
     for (var i=0;i<list.length;i++){
@@ -92,19 +152,16 @@
       card.type = 'button';
       card.className = 'card ' + a.type;
       card.setAttribute('data-index', String(i));
-      card.innerHTML =
-        '<div class="card-header">'+ (i+1) +'. '+ a.date +'</div>' +
-        '<div class="card-body">'+ a.text +'</div>';
+      card.innerHTML = '<div class="card-header">'+(i+1)+'. '+a.date+'</div><div class="card-body">'+a.text+'</div>';
       cardsWrap.appendChild(card);
     }
     cardsWrap.classList.remove('hidden');
     cardsWrap.setAttribute('aria-busy','false');
     skeletons.classList.add('hidden');
   }
-  // имитация небольшой задержки загрузки для показа скелетона
   setTimeout(function(){ renderCards(activities); }, 120);
 
-  // ===== Tabs =====
+  // ---------- Tabs ----------
   function showTab(id){
     var panels = $all('.tab-content');
     for (var i=0;i<panels.length;i++) panels[i].classList.add('hidden');
@@ -115,15 +172,14 @@
     (function(btn){ on(btn,'click',function(){ showTab(btn.dataset.tab); }); on(btn,'touchstart',function(){ showTab(btn.dataset.tab); },{passive:true}); })(tabs[t]);
   }
 
-  // ===== Filters =====
+  // ---------- Filters ----------
   function applyFilter(type){
     for (var i=0;i<filters.length;i++){
       var active = (filters[i].dataset.filter===type) || (type==='all' && filters[i].dataset.filter==='all');
       filters[i].classList.toggle('active', active);
       filters[i].setAttribute('aria-pressed', active ? 'true':'false');
     }
-    var cards = $all('.card');
-    var visible = 0;
+    var cards = $all('.card'); var visible = 0;
     for (var k=0;k<cards.length;k++){
       var show = (type==='all' || cards[k].classList.contains(type));
       cards[k].style.display = show ? 'flex' : 'none';
@@ -136,40 +192,21 @@
   }
   on(resetFilters,'click',function(){ applyFilter('all'); showToast('Фильтры сброшены'); });
 
-  // ===== Dialog (Schedule) =====
+  // ---------- Dialog ----------
   function openDetails(idx){
     var act = activities[idx]; if (!act) return;
-    detailsTitle.textContent = 'День '+ (idx+1) +' • '+ act.date;
+    detailsTitle.textContent = 'День '+(idx+1)+' • '+act.date;
     scheduleList.innerHTML = '';
-
-    var rows = ['09:00 — Выход из дома'];
-    if (act.type==='sea'){
-      var loc = act.text.split(' +')[0];
-      rows.push('10:00–13:00 — Пляж '+loc);
-      rows.push('13:00–14:00 — Обед');
-      rows.push('14:00–17:00 — Пляж '+loc);
-      rows.push('17:00–18:00 — Возвращение домой');
-    } else {
-      var parts = act.text.split(' +'); var main=parts[0]; var sub=parts[1]||'ближайшая локация';
-      rows.push('10:00–12:00 — Посещение '+main);
-      rows.push('12:00–13:00 — Обед');
-      rows.push('13:00–15:00 — Прогулка в '+sub);
-      rows.push('15:00–17:00 — Детская зона в '+sub);
-      rows.push('17:00–18:00 — Возвращение домой');
-    }
-    for (var r=0;r<rows.length;r++){ var li=document.createElement('li'); li.textContent=rows[r]; scheduleList.appendChild(li); }
-
+    var plan = generateSchedule(act);
+    for (var i=0;i<plan.length;i++){ var li=document.createElement('li'); li.textContent=plan[i]; scheduleList.appendChild(li); }
     overlay.classList.remove('hidden'); details.classList.remove('hidden');
-    overlay.style.display='block'; details.style.display='block';
-    overlay.setAttribute('aria-hidden','false');
+    overlay.style.display='block'; details.style.display='block'; overlay.setAttribute('aria-hidden','false');
   }
   function closeDetails(){
     overlay.classList.add('hidden'); details.classList.add('hidden');
-    overlay.style.display='none'; details.style.display='none';
-    overlay.setAttribute('aria-hidden','true');
+    overlay.style.display='none'; details.style.display='none'; overlay.setAttribute('aria-hidden','true');
   }
-  on(overlay,'click',closeDetails);
-  on(closeBtn,'click',closeDetails);
+  on(overlay,'click',closeDetails); on(closeBtn,'click',closeDetails);
 
   on(cardsWrap,'click',function(e){
     var card = e.target.closest ? e.target.closest('.card') : null;
@@ -182,33 +219,24 @@
     openDetails(Number(card.getAttribute('data-index')));
   },{passive:true});
 
-  // ===== Today quick filter (ищем ближайший будущий день) =====
+  // ---------- Quick actions ----------
   on(todayBtn,'click',function(){
-    // упрощенно: подсветим первую карточку типа 'sea' как пример "сегодня"
-    var first = $('.card');
-    if (first){ first.scrollIntoView({behavior:'smooth', block:'center'}); pulse(first); }
+    var first = $('.card'); if (first){ first.scrollIntoView({behavior:'smooth', block:'center'}); pulse(first); }
   });
-
-  // ===== Scroll to top FAB =====
   on(scrollTopBtn,'click',function(){ window.scrollTo({top:0, behavior:'smooth'}); });
 
-  // ===== Micro-interaction helpers =====
-  function pulse(el){
-    if (!el) return;
-    el.style.filter='brightness(1.08)';
-    setTimeout(function(){ el.style.filter=''; }, 600);
-  }
+  function pulse(el){ if (!el) return; el.style.filter='brightness(1.08)'; setTimeout(function(){ el.style.filter=''; }, 600); }
 
-  // ===== Snackbar =====
-  var hideToastTimer;
+  // Snackbar
+  var snackbar = $('#snackbar'); var hideToastTimer;
   function showToast(text){
     if (!snackbar) return;
     snackbar.textContent = text;
-    snackbar.classList.add('show');
+    snackbar.className = 'snackbar show';
     clearTimeout(hideToastTimer);
-    hideToastTimer = setTimeout(function(){ snackbar.classList.remove('show'); }, 1800);
+    hideToastTimer = setTimeout(function(){ snackbar.className = 'snackbar'; }, 1800);
   }
 
-  // стартовая вкладка
+  // Стартовая вкладка
   showTab('calendar');
 })();
