@@ -20,12 +20,27 @@
     .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
     .card {
       border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.1);
-      padding:12px; color:#fff;
+      padding:12px; color:#fff; cursor:pointer;
     }
     .sea { background:#4db6e1; }             /* море */
     .sight { background:#ffa726; }           /* достопримечательности */
     .card h3 { margin:0 0 8px; font-size:16px; }
     .card p { margin:0; font-size:14px; }
+    .details {
+      position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+      background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2);
+      width:300px; max-width:90%; padding:16px; display:none; z-index:1000;
+    }
+    .details h3 { margin-top:0; }
+    .details ul { padding-left:20px; }
+    .overlay {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.4); display:none; z-index:999;
+    }
+    .close-btn {
+      position:absolute; top:8px; right:12px; background:none; border:none;
+      font-size:18px; cursor:pointer;
+    }
     ul { padding-left:20px; }
     ul li { margin-bottom:8px; }
   </style>
@@ -47,59 +62,13 @@
         <button class="filter" data-filter="sight">Достопримечательности</button>
       </div>
       <div class="cards">
-        <!-- День 1 — Море -->
-        <div class="card sea" data-type="sea">
+        <!-- пример карточки -->
+        <div class="card sea" data-type="sea" data-day="1">
           <h3>1 • 29.12.2025</h3>
           <p>Пляж Джомтьен + детская зона</p>
         </div>
-        <!-- День 2 — Море -->
-        <div class="card sea" data-type="sea">
-          <h3>2 • 30.12.2025</h3>
-          <p>Пляж Вонгамат + водные горки</p>
-        </div>
-        <!-- День 3 — Достопримечательности -->
-        <div class="card sight" data-type="sight">
-          <h3>3 • 31.12.2025</h3>
-          <p>Ват Янсангварам + парк</p>
-        </div>
-        <!-- День 4 — Море -->
-        <div class="card sea" data-type="sea">
-          <h3>4 • 01.01.2026</h3>
-          <p>Пляж Паттайя + Underwater World</p>
-        </div>
-        <!-- День 5 — Море -->
-        <div class="card sea" data-type="sea">
-          <h3>5 • 02.01.2026</h3>
-          <p>Прогулка к Ко Лан (снорклинг)</p>
-        </div>
-        <!-- День 6 — Достопримечательности -->
-        <div class="card sight" data-type="sight">
-          <h3>6 • 03.01.2026</h3>
-          <p>Нонг Нуч + шоу слонов</p>
-        </div>
-        <!-- ... остальные карточки аналогично ... -->
-        <div class="card sea" data-type="sea"><h3>7 • 04.01.2026</h3><p>Пляж Джомтьен</p></div>
-        <div class="card sea" data-type="sea"><h3>8 • 05.01.2026</h3><p>Пляж Вонгамат + детский байк</p></div>
-        <div class="card sight" data-type="sight"><h3>9 • 06.01.2026</h3><p>Ват Кхао Пхра Бат</p></div>
-        <div class="card sea" data-type="sea"><h3>10 • 07.01.2026</h3><p>Прогулка к Ко Сичанг</p></div>
-        <div class="card sea" data-type="sea"><h3>11 • 08.01.2026</h3><p>Пляж Паттайя</p></div>
-        <div class="card sight" data-type="sight"><h3>12 • 09.01.2026</h3><p>Dolphin World</p></div>
-        <div class="card sea" data-type="sea"><h3>13 • 10.01.2026</h3><p>Пляж Джомтьен</p></div>
-        <div class="card sight" data-type="sight"><h3>14 • 11.01.2026</h3><p>Батискаф (12.969175,100.888124)</p></div>
-        <div class="card sight" data-type="sight"><h3>15 • 12.01.2026</h3><p>Art in Paradise + рынок</p></div>
-        <div class="card sea" data-type="sea"><h3>16 • 13.01.2026</h3><p>Пляж Вонгамат</p></div>
-        <div class="card sea" data-type="sea"><h3>17 • 14.01.2026</h3><p>Пляж Паттайя</p></div>
-        <div class="card sight" data-type="sight"><h3>18 • 15.01.2026</h3><p>Мини-Сиам</p></div>
-        <div class="card sea" data-type="sea"><h3>19 • 16.01.2026</h3><p>Прогулка к Ко Лан</p></div>
-        <div class="card sea" data-type="sea"><h3>20 • 17.01.2026</h3><p>Пляж Джомтьен</p></div>
-        <div class="card sight" data-type="sight"><h3>21 • 18.01.2026</h3><p>Sea Life Pattaya</p></div>
-        <div class="card sea" data-type="sea"><h3>22 • 19.01.2026</h3><p>Пляж Вонгамат</p></div>
-        <div class="card sea" data-type="sea"><h3>23 • 20.01.2026</h3><p>Пляж Паттайя</p></div>
-        <div class="card sight" data-type="sight"><h3>24 • 21.01.2026</h3><p>Ват Пхра Яй</p></div>
-        <div class="card sea" data-type="sea"><h3>25 • 22.01.2026</h3><p>Пляж Джомтьен</p></div>
-        <div class="card sea" data-type="sea"><h3>26 • 23.01.2026</h3><p>Пляж Вонгамат</p></div>
-        <div class="card sight" data-type="sight"><h3>27 • 24.01.2026</h3><p>Central Festival</p></div>
-        <div class="card sea" data-type="sea"><h3>28 • 25.01.2026</h3><p>Пляж Паттайя</p></div>
+        <!-- аналогично для всех дней (2–28) -->
+        <!-- Скрипт ниже будет обрабатывать клики -->
       </div>
     </div>
 
@@ -128,33 +97,119 @@
     </div>
   </div>
 
+  <div class="overlay" id="overlay"></div>
+  <div class="details" id="details">
+    <button class="close-btn" id="closeBtn">&times;</button>
+    <h3 id="detailsTitle"></h3>
+    <ul id="scheduleList"></ul>
+  </div>
+
   <script>
-    // Переключение вкладок
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
+    // Пример данных расписания по часам для sea/sight
+    const schedules = {
+      sea: [
+        "09:00 — Выход из дома",
+        "10:00–13:00 — Пляж",
+        "13:00–14:00 — Обед",
+        "14:00–17:00 — Пляж",
+        "17:00–18:00 — Возвращение домой"
+      ],
+      sight: [
+        "09:00 — Выход из дома",
+        "10:00–12:00 — Основная экскурсия",
+        "12:00–13:00 — Обед",
+        "13:00–15:00 — Вторая локация",
+        "15:00–17:00 — Детская зона/парк",
+        "17:00–18:00 — Возвращение домой"
+      ]
+    };
+
+    // Заполнение карточек (1–28)
+    const activities = [
+      {type:'sea', date:'29.12.2025', text:'Пляж Джомтьен + детская зона'},
+      {type:'sea', date:'30.12.2025', text:'Пляж Вонгамат + водные горки'},
+      {type:'sight', date:'31.12.2025', text:'Ват Янсангварам + парк'},
+      {type:'sea', date:'01.01.2026', text:'Пляж Паттайя + Underwater World'},
+      {type:'sea', date:'02.01.2026', text:'Прогулка к Ко Лан'},
+      {type:'sight', date:'03.01.2026', text:'Нонг Нуч + шоу слонов'},
+      {type:'sea', date:'04.01.2026', text:'Пляж Джомтьен'},
+      {type:'sea', date:'05.01.2026', text:'Пляж Вонгамат + байк'},
+      {type:'sight', date:'06.01.2026', text:'Ват Кхао Пхра Бат'},
+      {type:'sea', date:'07.01.2026', text:'Прогулка к Ко Сичанг'},
+      {type:'sea', date:'08.01.2026', text:'Пляж Паттайя'},
+      {type:'sight', date:'09.01.2026', text:'Dolphin World'},
+      {type:'sea', date:'10.01.2026', text:'Пляж Джомтьен'},
+      {type:'sight', date:'11.01.2026', text:'Батискаф'},
+      {type:'sight', date:'12.01.2026', text:'Art in Paradise'},
+      {type:'sea', date:'13.01.2026', text:'Пляж Вонгамат'},
+      {type:'sea', date:'14.01.2026', text:'Пляж Паттайя'},
+      {type:'sight', date:'15.01.2026', text:'Мини-Сиам'},
+      {type:'sea', date:'16.01.2026', text:'Прогулка к Ко Лан'},
+      {type:'sea', date:'17.01.2026', text:'Пляж Джомтьен'},
+      {type:'sight', date:'18.01.2026', text:'Sea Life Pattaya'},
+      {type:'sea', date:'19.01.2026', text:'Пляж Вонгамат'},
+      {type:'sea', date:'20.01.2026', text:'Пляж Паттайя'},
+      {type:'sight', date:'21.01.2026', text:'Ват Пхра Яй'},
+      {type:'sea', date:'22.01.2026', text:'Пляж Джомтьен'},
+      {type:'sea', date:'23.01.2026', text:'Пляж Вонгамат'},
+      {type:'sight', date:'24.01.2026', text:'Central Festival'},
+      {type:'sea', date:'25.01.2026', text:'Пляж Паттайя'}
+    ];
+    const cardsContainer = document.querySelector('.cards');
+    cardsContainer.innerHTML = '';
+    activities.forEach((a,i) => {
+      const div = document.createElement('div');
+      div.className = `card ${a.type}`;
+      div.dataset.type = a.type;
+      div.dataset.day = i+1;
+      div.innerHTML = `<h3>${i+1} • ${a.date}</h3><p>${a.text}</p>`;
+      cardsContainer.append(div);
+    });
+
+    // Вкладки
+    document.querySelectorAll('.tab').forEach(tab=>{
+      tab.addEventListener('click',()=>{
         document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
         tab.classList.add('active');
-        const target = tab.dataset.tab;
-        document.querySelectorAll('.tab-content')
-          .forEach(c=>c.id===target?c.classList.remove('hidden'):c.classList.add('hidden'));
+        document.querySelectorAll('.tab-content').forEach(c=>c.id===tab.dataset.tab?c.classList.remove('hidden'):c.classList.add('hidden'));
       });
     });
 
-    // Фильтры карточек
-    document.querySelectorAll('.filter').forEach(btn => {
-      btn.addEventListener('click', () => {
+    // Фильтры
+    document.querySelectorAll('.filter').forEach(btn=>{
+      btn.addEventListener('click',()=>{
         document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
-        const filter = btn.dataset.filter;
-        document.querySelectorAll('.card').forEach(card => {
-          card.style.display = 
-            filter === 'all' || card.dataset.type === filter ? 'block' : 'none';
-        });
+        const f=btn.dataset.filter;
+        document.querySelectorAll('.card').forEach(c=>c.style.display=(f==='all'||c.dataset.type===f)?'block':'none');
       });
     });
 
+    // Детали по клику
+    const overlay=document.getElementById('overlay'),
+          details=document.getElementById('details'),
+          title=document.getElementById('detailsTitle'),
+          list=document.getElementById('scheduleList'),
+          closeBtn=document.getElementById('closeBtn');
+    cardsContainer.addEventListener('click',e=>{
+      const card=e.target.closest('.card');
+      if(!card) return;
+      const type=card.dataset.type, day=card.dataset.day, date=activities[day-1].date;
+      title.textContent = `День ${day} • ${date}`;
+      list.innerHTML = '';
+      schedules[type].forEach(item=>{
+        const li=document.createElement('li');
+        li.textContent=item;
+        list.append(li);
+      });
+      overlay.style.display = 'block';
+      details.style.display = 'block';
+    });
+    closeBtn.onclick = ()=>{ overlay.style.display='none'; details.style.display='none'; };
+    overlay.onclick = closeBtn.onclick;
+
     // Telegram WebApp ready
-    if (window.Telegram?.WebApp) Telegram.WebApp.ready();
+    if(window.Telegram?.WebApp) Telegram.WebApp.ready();
   </script>
 
 </body>
