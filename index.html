@@ -27,16 +27,13 @@
     .sea { background:#4db6e1; }
     .sight { background:#ffa726; }
     .card h3 { margin:0 0 8px; font-size:16px; display:flex; align-items:center; }
-    .card h3 span { margin-left:6px; font-size:18px; }
     .card p { margin:0; font-size:14px; display:flex; align-items:center; }
-    .card p span { margin-right:6px; }
     .details {
       position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
       background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2);
       width:300px; max-width:90%; padding:16px; display:none; z-index:1000;
     }
     .details h3 { margin-top:0; display:flex; align-items:center; }
-    .details h3 span { margin-right:8px; font-size:20px; }
     .details ul { padding-left:20px; }
     .details ul li:before { content:'⏰'; margin-right:6px; }
     .overlay {
@@ -116,24 +113,70 @@
       {type:'sea', date:'29.12.2025', text:'Пляж Джомтьен + детская зона'},
       {type:'sea', date:'30.12.2025', text:'Пляж Вонгамат + водные горки'},
       {type:'sight', date:'31.12.2025', text:'Ват Янсангварам + парк'},
-      // ... остальные ...
+      {type:'sea', date:'01.01.2026', text:'Пляж Паттайя + Underwater World'},
+      {type:'sea', date:'02.01.2026', text:'Морская прогулка к Ко Лан'},
+      {type:'sight', date:'03.01.2026', text:'Сад Нонг Нуч + шоу слонов'},
+      {type:'sea', date:'04.01.2026', text:'Пляж Джомтьен'},
+      {type:'sea', date:'05.01.2026', text:'Пляж Вонгамат + аренда байка'},
+      {type:'sight', date:'06.01.2026', text:'Ват Кхао Пхра Бат + обзор'},
+      {type:'sea', date:'07.01.2026', text:'Морская прогулка к Ко Сичанг'},
+      {type:'sea', date:'08.01.2026', text:'Пляж Паттайя'},
+      {type:'sight', date:'09.01.2026', text:'Dolphin World + детская зона'},
+      {type:'sea', date:'10.01.2026', text:'Пляж Джомтьен'},
+      {type:'sight', date:'11.01.2026', text:'Батискаф (12.969175,100.888124)'},
+      {type:'sight', date:'12.01.2026', text:'Art in Paradise + плавучий рынок'},
+      {type:'sea', date:'13.01.2026', text:'Пляж Вонгамат'},
+      {type:'sea', date:'14.01.2026', text:'Пляж Паттайя'},
+      {type:'sight', date:'15.01.2026', text:'Мини-Сиам + детские аттракционы'},
+      {type:'sea', date:'16.01.2026', text:'Морская прогулка к Ко Лан'},
+      {type:'sea', date:'17.01.2026', text:'Пляж Джомтьен'},
+      {type:'sight', date:'18.01.2026', text:'Sea Life Pattaya (аквариум)'},
+      {type:'sea', date:'19.01.2026', text:'Пляж Вонгамат'},
+      {type:'sea', date:'20.01.2026', text:'Пляж Паттайя'},
+      {type:'sight', date:'21.01.2026', text:'Ват Пхра Яй + парк Люксор'},
+      {type:'sea', date:'22.01.2026', text:'Пляж Джомтьен'},
+      {type:'sea', date:'23.01.2026', text:'Пляж Вонгамат'},
+      {type:'sight', date:'24.01.2026', text:'Central Festival + фуд-корт'},
+      {type:'sea', date:'25.01.2026', text:'Пляж Паттайя'}
     ];
 
-    // Динамическое расписание
     const cardsContainer = document.querySelector('.cards');
     activities.forEach((a,i) => {
-      const idx = i+1;
-      const card = document.createElement('div');
-      card.className = `card ${a.type}`;
-      card.dataset.type = a.type;
-      card.dataset.day = idx;
-      card.innerHTML = `
-        <h3><span>${idx}</span> • ${a.date}</h3>
-        <p><span>🔹</span>${a.text}</p>`;
-      cardsContainer.append(card);
+      const day = i + 1;
+      const div = document.createElement('div');
+      div.className = `card ${a.type}`;
+      div.dataset.type = a.type;
+      div.dataset.day = day;
+      div.innerHTML = `
+        <h3>${day} • ${a.date}</h3>
+        <p>🔹 ${a.text}</p>`;
+      cardsContainer.append(div);
     });
 
-    // Открытие детализации
+    // Вкладки
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c =>
+          c.id === tab.dataset.tab ? c.classList.remove('hidden') : c.classList.add('hidden')
+        );
+      });
+    });
+
+    // Фильтры
+    document.querySelectorAll('.filter').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        document.querySelectorAll('.card').forEach(c =>
+          c.style.display = (f === 'all' || c.dataset.type === f) ? 'flex' : 'none'
+        );
+      });
+    });
+
+    // Детали расписания
     const overlay = document.getElementById('overlay');
     const details = document.getElementById('details');
     const title = document.getElementById('detailsTitle');
@@ -143,28 +186,25 @@
     cardsContainer.addEventListener('click', e => {
       const card = e.target.closest('.card');
       if (!card) return;
-      const day = +card.dataset.day;
-      const activity = activities[day-1];
-      title.textContent = `День ${day} • ${activity.date}`;
+      const idx = +card.dataset.day - 1;
+      const activity = activities[idx];
+      title.textContent = `День ${idx+1} • ${activity.date}`;
       list.innerHTML = '';
-
-      // Построение расписания
-      // 09:00 — выход
       list.innerHTML += `<li>09:00 — Выход из дома</li>`;
-      if (activity.type==='sea') {
+      if (activity.type === 'sea') {
         list.innerHTML += `<li>10:00–13:00 — Пляж ${activity.text.split(' +')[0]}</li>`;
         list.innerHTML += `<li>13:00–14:00 — 🍽️ Обед</li>`;
         list.innerHTML += `<li>14:00–17:00 — Пляж ${activity.text.split(' +')[0]}</li>`;
         list.innerHTML += `<li>17:00–18:00 — Возвращение домой</li>`;
       } else {
-        const [main, sub] = activity.text.split(' +');
+        const parts = activity.text.split(' +');
+        const main = parts[0], sub = parts[1];
         list.innerHTML += `<li>10:00–12:00 — Посещение ${main}</li>`;
         list.innerHTML += `<li>12:00–13:00 — 🍽️ Обед</li>`;
         list.innerHTML += `<li>13:00–15:00 — Прогулка в ${sub}</li>`;
         list.innerHTML += `<li>15:00–17:00 — Детская зона в ${sub}</li>`;
         list.innerHTML += `<li>17:00–18:00 — Возвращение домой</li>`;
       }
-
       overlay.style.display = 'block';
       details.style.display = 'block';
     });
@@ -175,26 +215,8 @@
     };
     overlay.onclick = closeBtn.onclick;
 
-    // Фильтрация и вкладки (без изменений)
-    document.querySelectorAll('.filter').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        const f = btn.dataset.filter;
-        document.querySelectorAll('.card')
-          .forEach(c=> c.style.display = f==='all'||c.dataset.type===f ? 'flex' : 'none');
-      });
-    });
-    document.querySelectorAll('.tab').forEach(tab=>{
-      tab.addEventListener('click',()=>{
-        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-        tab.classList.add('active');
-        document.querySelectorAll('.tab-content')
-          .forEach(c=>c.id===tab.dataset.tab?c.classList.remove('hidden'):c.classList.add('hidden'));
-      });
-    });
-
     if (window.Telegram?.WebApp) Telegram.WebApp.ready();
   </script>
+
 </body>
 </html>
