@@ -5,16 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>GoInPattaya • Планер</title>
 
-  <!-- Официальный SDK Telegram Mini Apps -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Cache-busting: обновляйте версию при каждом деплое -->
-  <link rel="stylesheet" href="style.css?v=2025.09.24-UX3">
+  <link rel="stylesheet" href="style.css?v=2025.09.24-UX3.1">
 </head>
-<body data-version="2025.09.24-UX3">
+<body data-version="2025.09.24-UX3.1">
   <noscript>Для работы приложения требуется JavaScript.</noscript>
 
-  <!-- Top App Bar -->
   <header class="appbar" role="banner">
     <div class="appbar__left">
       <div class="logo">🏖️</div>
@@ -28,7 +24,6 @@
     </div>
   </header>
 
-  <!-- Tabs -->
   <nav class="tabs" role="tablist" aria-label="Разделы приложения">
     <button class="tab active" data-tab="calendar" role="tab" aria-selected="true">Календарь</button>
     <button class="tab" data-tab="tips" role="tab" aria-selected="false">Советы</button>
@@ -36,29 +31,20 @@
   </nav>
 
   <main class="content">
-    <!-- Календарь -->
     <section id="calendar" class="tab-content" role="tabpanel" aria-labelledby="tab-calendar">
-      <!-- Фильтры -->
       <div class="filters sticky" role="toolbar" aria-label="Фильтр активностей">
         <button class="filter active" data-filter="all" aria-pressed="true">🔄 Все</button>
         <button class="filter" data-filter="sea" aria-pressed="false">🌊 Море</button>
         <button class="filter" data-filter="sight" aria-pressed="false">🏛️ Достопримеч.</button>
       </div>
 
-      <!-- Скелетоны на время загрузки -->
       <div id="skeletons" class="cards">
-        <div class="skeleton card"></div>
-        <div class="skeleton card"></div>
-        <div class="skeleton card"></div>
-        <div class="skeleton card"></div>
-        <div class="skeleton card"></div>
-        <div class="skeleton card"></div>
+        <div class="skeleton card"></div><div class="skeleton card"></div><div class="skeleton card"></div>
+        <div class="skeleton card"></div><div class="skeleton card"></div><div class="skeleton card"></div>
       </div>
 
-      <!-- Карточки дней -->
       <div class="cards hidden" aria-live="polite" aria-busy="true"></div>
 
-      <!-- Пустое состояние -->
       <div id="emptyState" class="empty hidden">
         <div class="empty__icon">🔍</div>
         <div class="empty__title">Ничего не найдено</div>
@@ -67,10 +53,8 @@
       </div>
     </section>
 
-    <!-- Советы -->
     <section id="tips" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-tips">
       <h2>💡 Полезная информация</h2>
-
       <div class="section">
         <h3>Советы по поездке</h3>
         <ul class="list">
@@ -85,21 +69,12 @@
       <div class="section">
         <h3>Обязательно попробовать</h3>
         <ul class="grid-list">
-          <li>🥘 Phanaeng Curry</li>
-          <li>🍜 Khao Soi</li>
-          <li>🥣 Massaman Curry</li>
-          <li>🥥 Tom Kha Gai</li>
-          <li>🍗 Kai Yang</li>
-          <li>🌿 Phat Kaphrao</li>
-          <li>🍝 Pad Thai</li>
-          <li>🥭 Khao Niao Mamuang</li>
-          <li>🥗 Som Tam</li>
-          <li>🍲 Tom Yum Goong</li>
+          <li>🥘 Phanaeng Curry</li><li>🍜 Khao Soi</li><li>🥣 Massaman Curry</li><li>🥥 Tom Kha Gai</li><li>🍗 Kai Yang</li>
+          <li>🌿 Phat Kaphrao</li><li>🍝 Pad Thai</li><li>🥭 Khao Niao Mamuang</li><li>🥗 Som Tam</li><li>🍲 Tom Yum Goong</li>
         </ul>
       </div>
     </section>
 
-    <!-- Контакты -->
     <section id="contacts" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-contacts">
       <h2>📇 Контакты</h2>
       <ul class="list">
@@ -112,15 +87,10 @@
     </section>
   </main>
 
-  <!-- Версия и быстрые действия -->
   <footer class="footer">
     <span id="appVersion">v0.0.0</span>
-    <div class="footer__actions">
-      <button id="scrollTop" class="fab" title="Наверх">⬆️</button>
-    </div>
   </footer>
 
-  <!-- Модалка расписания -->
   <div id="overlay" class="overlay hidden" style="display:none" aria-hidden="true"></div>
   <div id="details" class="details hidden" style="display:none" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
     <button id="closeBtn" class="close-btn" aria-label="Закрыть">✖️</button>
@@ -128,10 +98,8 @@
     <ul id="scheduleList" class="schedule"></ul>
   </div>
 
-  <!-- Snackbar -->
   <div id="snackbar" class="snackbar" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- Скрипт проекта -->
-  <script src="app.js?v=2025.09.24-UX3"></script>
+  <script src="app.js?v=2025.09.24-UX3.1"></script>
 </body>
 </html>
