@@ -8,10 +8,11 @@
   <!-- Официальный SDK Telegram Mini Apps -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Стили проекта с версионированием для обхода кэша -->
-  <link rel="stylesheet" href="style.css?v=20250924-03">
+  <!-- Версия сборки для cache-busting -->
+  <!-- ВАЖНО: обновляйте data-version и ?v= при каждом деплое -->
+  <link rel="stylesheet" href="style.css?v=2025.09.24-05">
 </head>
-<body>
+<body data-version="2025.09.24-05">
   <noscript>Для работы приложения требуется JavaScript.</noscript>
 
   <header class="tabs" role="tablist" aria-label="Главные разделы">
@@ -21,6 +22,7 @@
   </header>
 
   <main class="content">
+    <!-- Календарь -->
     <section id="calendar" class="tab-content" role="tabpanel" aria-labelledby="tab-calendar">
       <nav class="filters" aria-label="Фильтр активностей">
         <button class="filter active" data-filter="all" aria-pressed="true">🔄 Все</button>
@@ -30,6 +32,7 @@
       <div class="cards" aria-live="polite" aria-busy="true"></div>
     </section>
 
+    <!-- Советы -->
     <section id="tips" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-tips">
       <h2>💡 Полезная информация</h2>
       <div class="section" id="travel-tips">
@@ -59,6 +62,7 @@
       </div>
     </section>
 
+    <!-- Контакты -->
     <section id="contacts" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-contacts">
       <h2>📇 Контакты</h2>
       <ul>
@@ -71,6 +75,12 @@
     </section>
   </main>
 
+  <!-- Версия UI -->
+  <footer class="version" role="contentinfo">
+    <span id="appVersion">v0.0.0</span>
+  </footer>
+
+  <!-- Модалка расписания -->
   <div id="overlay" class="overlay hidden" aria-hidden="true"></div>
   <div id="details" class="details hidden" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
     <button id="closeBtn" class="close-btn" aria-label="Закрыть">✖️</button>
@@ -78,7 +88,7 @@
     <ul id="scheduleList"></ul>
   </div>
 
-  <!-- Скрипты проекта с версионированием; без defer/async для WebView -->
-  <script src="app.js?v=20250924-03"></script>
+  <!-- Скрипты проекта: без defer/async для WebView Telegram -->
+  <script src="app.js?v=2025.09.24-05"></script>
 </body>
 </html>
