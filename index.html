@@ -6,12 +6,12 @@
   <title>Планер Паттайя</title>
 
   <!-- Официальный SDK Telegram Mini Apps -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script> <!-- обязателен для Telegram.WebApp.* -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Обход кэша WebView: обновляйте версию при каждом деплое -->
-  <link rel="stylesheet" href="style.css?v=2025.09.24-06">
+  <!-- Cache-busting: обновляйте версию при деплое -->
+  <link rel="stylesheet" href="style.css?v=2025.09.24-UX1">
 </head>
-<body data-version="2025.09.24-06">
+<body data-version="2025.09.24-UX1">
   <noscript>Для работы приложения требуется JavaScript.</noscript>
 
   <header class="tabs" role="tablist" aria-label="Главные разделы">
@@ -23,10 +23,10 @@
   <main class="content">
     <!-- Календарь -->
     <section id="calendar" class="tab-content" role="tabpanel" aria-labelledby="tab-calendar">
-      <nav class="filters" aria-label="Фильтр активностей">
-        <button class="filter active" data-filter="all" aria-pressed="true">🔄 Все</button>
-        <button class="filter" data-filter="sea" aria-pressed="false">🌊 Море</button>
-        <button class="filter" data-filter="sight" aria-pressed="false">🏛️ Достопримеч.</button>
+      <nav class="filters sticky" aria-label="Фильтр активностей">
+        <button class="filter active" data-filter="all" aria-pressed="true" title="Все">🔄 Все</button>
+        <button class="filter" data-filter="sea" aria-pressed="false" title="Море">🌊 Море</button>
+        <button class="filter" data-filter="sight" aria-pressed="false" title="Достопримечательности">🏛️ Достопримеч.</button>
       </nav>
       <div class="cards" aria-live="polite" aria-busy="true"></div>
     </section>
@@ -34,6 +34,7 @@
     <!-- Советы -->
     <section id="tips" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-tips">
       <h2>💡 Полезная информация</h2>
+
       <div class="section" id="travel-tips">
         <h3>Советы по поездке</h3>
         <ul>
@@ -44,6 +45,7 @@
           <li>👟 Удобная обувь для прогулок в Нонг Нуч.</li>
         </ul>
       </div>
+
       <div class="section" id="must-try">
         <h3>Обязательно попробовать</h3>
         <ul>
@@ -74,11 +76,10 @@
     </section>
   </main>
 
-  <!-- Строка версии и отладка -->
+  <!-- Версия UI -->
   <footer class="version" role="contentinfo">
     <span id="appVersion">v0.0.0</span>
   </footer>
-  <pre id="debug" class="debug hidden" aria-live="polite"></pre>
 
   <!-- Модалка расписания -->
   <div id="overlay" class="overlay hidden" style="display:none" aria-hidden="true"></div>
@@ -88,7 +89,7 @@
     <ul id="scheduleList"></ul>
   </div>
 
-  <!-- Скрипты проекта; без defer/async для максимальной совместимости WebView -->
-  <script src="app.js?v=2025.09.24-06"></script>
+  <!-- Скрипт проекта; без defer/async для совместимости WebView -->
+  <script src="app.js?v=2025.09.24-UX1"></script>
 </body>
 </html>
