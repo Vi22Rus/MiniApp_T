@@ -1,48 +1,34 @@
-/* ========= Theming (переменные заполняются из Telegram theme через JS) ========= */
 :root{
-  --bg:#0f172a;                /* fallback для тёмной сцены, заменяется из JS */
-  --text:#e5e7eb;
-  --muted:#94a3b8;
-  --accent:#4f46e5;
-  --accent-2:#22d3ee;
-  --surface:rgba(255,255,255,0.06);
-  --surface-strong:rgba(255,255,255,0.12);
-  --glass:rgba(255,255,255,0.08);
+  --bg:#0f172a; --text:#e5e7eb; --muted:#94a3b8;
+  --accent:#4f46e5; --accent-2:#22d3ee;
+  --surface:rgba(255,255,255,0.06); --glass:rgba(255,255,255,0.08);
   --shadow: 0 6px 24px rgba(0,0,0,0.25);
-  --radius:14px;
-  --gap:12px;
-
-  --sea1:#3ba6e0; --sea2:#62d0ff;
-  --sight1:#ff9933; --sight2:#ffd166;
+  --radius:14px; --gap:12px;
+  --sea1:#3ba6e0; --sea2:#62d0ff; --sight1:#ff9933; --sight2:#ffd166;
 }
 
-/* ========= Base ========= */
 *{box-sizing:border-box}
 html,body{height:100%}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
 
 body{
-  margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color:var(--text);
   background:
     radial-gradient(1200px 600px at -10% -20%, rgba(79,70,229,0.35), transparent 60%),
     radial-gradient(900px 500px at 110% 0%, rgba(34,211,238,0.25), transparent 60%),
     linear-gradient(180deg, #0b1220 0%, #0f172a 60%, #0b1020 100%);
   background-attachment: fixed;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* ========= App Bar ========= */
+/* App Bar */
 .appbar{
-  position: sticky; top:0; z-index:10;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:12px 16px;
-  backdrop-filter: blur(10px) saturate(120%);
+  position: sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px; backdrop-filter: blur(10px) saturate(120%);
   background: linear-gradient(180deg, rgba(17,24,39,0.75), rgba(17,24,39,0.45));
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
@@ -52,29 +38,22 @@ body{
 .titles .subtitle{font-size:12px; color:var(--muted)}
 .appbar__right .chip{margin-left:8px}
 
-/* ========= Tabs ========= */
+/* Tabs */
 .tabs{
   display:flex; gap:8px; padding:10px 12px; position:sticky; top:56px; z-index:9;
   background: linear-gradient(180deg, rgba(17,24,39,0.6), rgba(17,24,39,0.35));
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .tab{
-  flex: 1;
-  min-height:48px; padding:10px 12px; border-radius:999px;
+  flex:1; min-height:48px; padding:10px 12px; border-radius:999px;
   border:1px solid rgba(255,255,255,0.12);
-  background: var(--surface);
-  color:var(--text); cursor:pointer; user-select:none;
-  font-weight:600;
+  background: var(--surface); color:var(--text); cursor:pointer; user-select:none; font-weight:600;
   transition: background .2s ease, transform .06s ease, border-color .2s ease;
 }
-.tab.active{
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-  border-color: transparent;
-}
+.tab.active{ background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%); border-color: transparent; }
 .tab:active{ transform: translateY(1px) }
 
-/* ========= Chips, FAB ========= */
+/* Chips & FAB */
 .chip{
   min-height:40px; padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.16);
   background: var(--surface); color:var(--text); cursor:pointer;
@@ -85,36 +64,34 @@ body{
   color:#fff; box-shadow: var(--shadow);
 }
 
-/* ========= Content & Sections ========= */
+/* Content & Sections */
 .content{padding:16px}
 .section{
-  background: var(--glass);
-  backdrop-filter: blur(12px);
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius: var(--radius);
-  padding:16px;
-  box-shadow: var(--shadow);
-  margin-bottom:12px;
+  background: var(--glass); backdrop-filter: blur(12px);
+  border:1px solid rgba(255,255,255,0.12); border-radius: var(--radius);
+  padding:16px; box-shadow: var(--shadow); margin-bottom:12px;
 }
-h2{margin:8px 0 12px 0}
-h3{margin:0 0 10px 0}
+h2{margin:8px 0 12px 0} h3{margin:0 0 10px 0}
 
-/* ========= Filters ========= */
+/* Filters */
 .filters{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap}
 .filters.sticky{position:sticky; top:108px; z-index:8}
+.filter{
+  padding:10px 14px; min-height:48px; min-width:48px; border:0; border-radius:999px;
+  background: rgba(255,255,255,0.08); color:inherit; cursor:pointer; box-shadow: var(--shadow);
+}
+.filter.active{ background: var(--accent); color:#fff }
 
-/* ========= Cards ========= */
+/* Cards */
 .cards{
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: var(--gap);
 }
 .card{
   display:flex; flex-direction:column; justify-content:center;
   min-height:104px; padding:14px; border-radius: var(--radius);
   color:#0b1220; position:relative; overflow:hidden; cursor:pointer;
-  box-shadow: var(--shadow);
-  transform: translateZ(0);
+  box-shadow: var(--shadow); transform: translateZ(0);
   transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;
   background:linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
 }
@@ -144,38 +121,29 @@ h3{margin:0 0 10px 0}
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
 }
 
-/* ========= Skeleton ========= */
+/* Skeleton */
 .skeleton{
   position:relative; overflow:hidden; background: rgba(255,255,255,0.08);
   border:1px solid rgba(255,255,255,0.12); border-radius: var(--radius);
   min-height:104px; animation: pulse 1.2s ease-in-out infinite;
 }
-@keyframes pulse{
-  0%{opacity: .45}
-  50%{opacity: .75}
-  100%{opacity: .45}
-}
+@keyframes pulse{ 0%{opacity:.45} 50%{opacity:.75} 100%{opacity:.45} }
 
-/* ========= Empty State ========= */
+/* Empty State */
 .empty{
   display:flex; flex-direction:column; align-items:center; gap:8px; padding:24px;
   background: var(--glass); border:1px solid rgba(255,255,255,0.12); border-radius: var(--radius); box-shadow: var(--shadow);
 }
-.empty__icon{font-size:28px}
-.empty__title{font-weight:800}
-.empty__text{color:var(--muted)}
+.empty__icon{font-size:28px} .empty__title{font-weight:800} .empty__text{color:var(--muted)}
 
-/* ========= Dialog ========= */
+/* Dialog */
 .overlay{position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:40}
 .details{
   position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
   width:min(92vw, 420px);
   background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
-  color:#0b1220;
-  border-radius: var(--radius);
-  padding:16px 16px 12px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
-  z-index:50;
+  color:#0b1220; border-radius: var(--radius); padding:16px 16px 12px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35); z-index:50;
 }
 .close-btn{position:absolute; right:10px; top:8px; border:0; background:none; font-size:18px; cursor:pointer}
 .dialog-title{margin:0 0 10px 0}
@@ -184,20 +152,16 @@ h3{margin:0 0 10px 0}
 .schedule li:last-child{border-bottom:0}
 .schedule li:before{content:'⏰'; position:absolute; left:0; top:8px}
 
-/* ========= Footer (version + FAB) ========= */
+/* Footer */
 .footer{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
   position: sticky; bottom:0; padding:10px 16px;
   background: linear-gradient(180deg, rgba(17,24,39,0.35), rgba(17,24,39,0.8));
-  backdrop-filter: blur(10px);
-  border-top:1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px); border-top:1px solid rgba(255,255,255,0.06);
 }
 .footer #appVersion{font-size:12px; color:var(--muted)}
 .footer__actions{display:flex; gap:10px}
 
-/* ========= Lists ========= */
-.list{padding-left:16px}
-.list li{margin:6px 0}
-
-/* ========= Helpers ========= */
+/* Lists & helpers */
+.list{padding-left:16px} .list li{margin:6px 0}
 .hidden{display:none !important}
