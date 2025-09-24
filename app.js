@@ -1,10 +1,16 @@
 (function () {
   'use strict';
 
-  // Telegram SDK init
+  // Версия из data-атрибута, отображается в UI
+  const APP_VERSION = (document.body && document.body.dataset.version) ? document.body.dataset.version : 'dev';
+  const versionEl = document.getElementById('appVersion');
+  if (versionEl) versionEl.textContent = `v${APP_VERSION}`;
+
+  // Инициализация Telegram Mini App
   const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   if (tg) { tg.expand && tg.expand(); tg.ready(); }
 
+  // Данные на 28 дней
   const activities = [
     { type: 'sea',   date: '29.12.2025', text: 'Пляж Джомтьен + детская зона' },
     { type: 'sea',   date: '30.12.2025', text: 'Пляж Вонгамат + водные горки' },
@@ -36,6 +42,7 @@
     { type: 'sea',   date: '25.01.2026', text: 'Пляж Паттайя' }
   ];
 
+  // DOM
   const cardsContainer = document.querySelector('.cards');
   const tabs = document.querySelectorAll('.tab');
   const panels = document.querySelectorAll('.tab-content');
@@ -47,6 +54,7 @@
   const detailsTitle = document.getElementById('detailsTitle');
   const scheduleList = document.getElementById('scheduleList');
 
+  // Рендер карточек
   function renderCards(list) {
     cardsContainer.innerHTML = '';
     list.forEach((a, i) => {
@@ -64,6 +72,7 @@
   }
   renderCards(activities);
 
+  // Вкладки
   function showTab(id) {
     panels.forEach(p => p.classList.add('hidden'));
     document.getElementById(id)?.classList.remove('hidden');
@@ -74,6 +83,7 @@
     t.addEventListener('touchstart', () => showTab(t.dataset.tab), { passive: true });
   });
 
+  // Фильтры
   function applyFilter(type) {
     filters.forEach(f => f.classList.toggle('active', f.dataset.filter === type || (type === 'all' && f.dataset.filter === 'all')));
     document.querySelectorAll('.card').forEach(c => {
@@ -86,11 +96,13 @@
     btn.addEventListener('touchstart', () => applyFilter(type), { passive: true });
   });
 
+  // Модалка с расписанием
   function openDetails(idx) {
     const act = activities[idx];
     detailsTitle.textContent = `День ${idx + 1} • ${act.date}`;
     scheduleList.innerHTML = '';
     const rows = ['09:00 — Выход из дома'];
+
     if (act.type === 'sea') {
       const loc = act.text.split(' +')[0];
       rows.push(`10:00–13:00 — Пляж ${loc}`);
@@ -105,16 +117,32 @@
       rows.push(`15:00–17:00 — Детская зона в ${sub}`);
       rows.push('17:00–18:00 — Возвращение домой');
     }
-    rows.forEach(t => { const li = document.createElement('li'); li.textContent = t; scheduleList.appendChild(li); });
-    overlay.classList.remove('hidden'); details.classList.remove('hidden'); overlay.setAttribute('aria-hidden', 'false');
-  }
-  function closeDetails() { overlay.classList.add('hidden'); details.classList.add('hidden'); overlay.setAttribute('aria-hidden', 'true'); }
 
-  cardsContainer.addEventListener('click', e => { const card = e.target.closest('.card'); if (!card) return; openDetails(Number(card.dataset.index)); });
-  cardsContainer.addEventListener('touchstart', e => { const card = e.target.closest('.card'); if (!card) return; openDetails(Number(card.dataset.index)); }, { passive: true });
+    rows.forEach(t => { const li = document.createElement('li'); li.textContent = t; scheduleList.appendChild(li); });
+    overlay.classList.remove('hidden');
+    details.classList.remove('hidden');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+  function closeDetails() {
+    overlay.classList.add('hidden');
+    details.classList.add('hidden');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+
+  cardsContainer.addEventListener('click', e => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    openDetails(Number(card.dataset.index));
+  });
+  cardsContainer.addEventListener('touchstart', e => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    openDetails(Number(card.dataset.index));
+  }, { passive: true });
 
   overlay.addEventListener('click', closeDetails);
   closeBtn.addEventListener('click', closeDetails);
 
+  // По умолчанию показываем вкладку "Календарь"
   showTab('calendar');
 })();
