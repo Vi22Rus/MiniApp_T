@@ -2,53 +2,89 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Планер Паттайя</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>GoInPattaya • Планер</title>
 
   <!-- Официальный SDK Telegram Mini Apps -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Cache-busting: обновляйте версию при деплое -->
-  <link rel="stylesheet" href="style.css?v=2025.09.24-UX1">
+  <!-- Cache-busting: обновляйте версию при каждом деплое -->
+  <link rel="stylesheet" href="style.css?v=2025.09.24-UX2">
 </head>
-<body data-version="2025.09.24-UX1">
+<body data-version="2025.09.24-UX2">
   <noscript>Для работы приложения требуется JavaScript.</noscript>
 
-  <header class="tabs" role="tablist" aria-label="Главные разделы">
-    <button class="tab active" data-tab="calendar" role="tab" aria-selected="true">📅 Календарь</button>
-    <button class="tab" data-tab="tips" role="tab" aria-selected="false">💡 Советы</button>
-    <button class="tab" data-tab="contacts" role="tab" aria-selected="false">📇 Контакты</button>
+  <!-- Top App Bar -->
+  <header class="appbar" role="banner">
+    <div class="appbar__left">
+      <div class="logo">🏖️</div>
+      <div class="titles">
+        <div class="title">GoInPattaya</div>
+        <div class="subtitle">План на поездку</div>
+      </div>
+    </div>
+    <div class="appbar__right">
+      <button id="todayBtn" class="chip" title="Показать текущий день">📅 Сегодня</button>
+    </div>
   </header>
+
+  <!-- Tabs -->
+  <nav class="tabs" role="tablist" aria-label="Разделы приложения">
+    <button class="tab active" data-tab="calendar" role="tab" aria-selected="true">Календарь</button>
+    <button class="tab" data-tab="tips" role="tab" aria-selected="false">Советы</button>
+    <button class="tab" data-tab="contacts" role="tab" aria-selected="false">Контакты</button>
+  </nav>
 
   <main class="content">
     <!-- Календарь -->
     <section id="calendar" class="tab-content" role="tabpanel" aria-labelledby="tab-calendar">
-      <nav class="filters sticky" aria-label="Фильтр активностей">
-        <button class="filter active" data-filter="all" aria-pressed="true" title="Все">🔄 Все</button>
-        <button class="filter" data-filter="sea" aria-pressed="false" title="Море">🌊 Море</button>
-        <button class="filter" data-filter="sight" aria-pressed="false" title="Достопримечательности">🏛️ Достопримеч.</button>
-      </nav>
-      <div class="cards" aria-live="polite" aria-busy="true"></div>
+      <!-- Фильтры -->
+      <div class="filters sticky" role="toolbar" aria-label="Фильтр активностей">
+        <button class="filter active" data-filter="all" aria-pressed="true">🔄 Все</button>
+        <button class="filter" data-filter="sea" aria-pressed="false">🌊 Море</button>
+        <button class="filter" data-filter="sight" aria-pressed="false">🏛️ Достопримеч.</button>
+      </div>
+
+      <!-- Скелетоны на время загрузки -->
+      <div id="skeletons" class="cards">
+        <div class="skeleton card"></div>
+        <div class="skeleton card"></div>
+        <div class="skeleton card"></div>
+        <div class="skeleton card"></div>
+        <div class="skeleton card"></div>
+        <div class="skeleton card"></div>
+      </div>
+
+      <!-- Карточки дней -->
+      <div class="cards hidden" aria-live="polite" aria-busy="true"></div>
+
+      <!-- Пустое состояние -->
+      <div id="emptyState" class="empty hidden">
+        <div class="empty__icon">🔍</div>
+        <div class="empty__title">Ничего не найдено</div>
+        <div class="empty__text">Попробуйте другой фильтр или сбросьте выбор</div>
+        <button class="chip" id="resetFilters">Сбросить фильтры</button>
+      </div>
     </section>
 
     <!-- Советы -->
     <section id="tips" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-tips">
       <h2>💡 Полезная информация</h2>
 
-      <div class="section" id="travel-tips">
+      <div class="section">
         <h3>Советы по поездке</h3>
-        <ul>
-          <li>💧 Не забывать воду и солнцезащитный крем.</li>
-          <li>👗 Для храмов нужна закрытая одежда.</li>
-          <li>⏱️ Поездки на острова планировать заранее.</li>
-          <li>🐠 Снорклинг до 11:00 — наиболее комфортно.</li>
-          <li>👟 Удобная обувь для прогулок в Нонг Нуч.</li>
+        <ul class="list">
+          <li>💧 Вода и солнцезащитный крем всегда с собой</li>
+          <li>👗 Для храмов — закрытая одежда</li>
+          <li>⏱️ Островные поездки планируйте заранее</li>
+          <li>🐠 Снорклинг комфортнее до 11:00</li>
+          <li>👟 Удобная обувь для Нонг Нуч</li>
         </ul>
       </div>
 
-      <div class="section" id="must-try">
+      <div class="section">
         <h3>Обязательно попробовать</h3>
-        <ul>
+        <ul class="grid-list">
           <li>🥘 Phanaeng Curry</li>
           <li>🍜 Khao Soi</li>
           <li>🥣 Massaman Curry</li>
@@ -66,7 +102,7 @@
     <!-- Контакты -->
     <section id="contacts" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-contacts">
       <h2>📇 Контакты</h2>
-      <ul>
+      <ul class="list">
         <li>🏠 Club Royal Condominium (12.969175,100.888124)</li>
         <li>📞 Туристический офис: +66 38 253 000</li>
         <li>🚕 Такси: +66 98 771 7100</li>
@@ -76,20 +112,26 @@
     </section>
   </main>
 
-  <!-- Версия UI -->
-  <footer class="version" role="contentinfo">
+  <!-- Версия и быстрые действия -->
+  <footer class="footer">
     <span id="appVersion">v0.0.0</span>
+    <div class="footer__actions">
+      <button id="scrollTop" class="fab" title="Наверх">⬆️</button>
+    </div>
   </footer>
 
   <!-- Модалка расписания -->
   <div id="overlay" class="overlay hidden" style="display:none" aria-hidden="true"></div>
   <div id="details" class="details hidden" style="display:none" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
     <button id="closeBtn" class="close-btn" aria-label="Закрыть">✖️</button>
-    <h3>🕒 <span id="detailsTitle"></span></h3>
-    <ul id="scheduleList"></ul>
+    <h3 class="dialog-title">🕒 <span id="detailsTitle"></span></h3>
+    <ul id="scheduleList" class="schedule"></ul>
   </div>
 
-  <!-- Скрипт проекта; без defer/async для совместимости WebView -->
-  <script src="app.js?v=2025.09.24-UX1"></script>
+  <!-- Snackbar -->
+  <div id="snackbar" class="snackbar" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Скрипт проекта; без defer/async для WebView -->
+  <script src="app.js?v=2025.09.24-UX2"></script>
 </body>
 </html>
