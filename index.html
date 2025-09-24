@@ -6,13 +6,12 @@
   <title>Планер Паттайя</title>
 
   <!-- Официальный SDK Telegram Mini Apps -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script> <!-- обязателен для Telegram.WebApp.* -->
 
-  <!-- Версия сборки для cache-busting -->
-  <!-- ВАЖНО: обновляйте data-version и ?v= при каждом деплое -->
-  <link rel="stylesheet" href="style.css?v=2025.09.24-05">
+  <!-- Обход кэша WebView: обновляйте версию при каждом деплое -->
+  <link rel="stylesheet" href="style.css?v=2025.09.24-06">
 </head>
-<body data-version="2025.09.24-05">
+<body data-version="2025.09.24-06">
   <noscript>Для работы приложения требуется JavaScript.</noscript>
 
   <header class="tabs" role="tablist" aria-label="Главные разделы">
@@ -75,20 +74,21 @@
     </section>
   </main>
 
-  <!-- Версия UI -->
+  <!-- Строка версии и отладка -->
   <footer class="version" role="contentinfo">
     <span id="appVersion">v0.0.0</span>
   </footer>
+  <pre id="debug" class="debug hidden" aria-live="polite"></pre>
 
   <!-- Модалка расписания -->
-  <div id="overlay" class="overlay hidden" aria-hidden="true"></div>
-  <div id="details" class="details hidden" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
+  <div id="overlay" class="overlay hidden" style="display:none" aria-hidden="true"></div>
+  <div id="details" class="details hidden" style="display:none" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
     <button id="closeBtn" class="close-btn" aria-label="Закрыть">✖️</button>
     <h3>🕒 <span id="detailsTitle"></span></h3>
     <ul id="scheduleList"></ul>
   </div>
 
-  <!-- Скрипты проекта: без defer/async для WebView Telegram -->
-  <script src="app.js?v=2025.09.24-05"></script>
+  <!-- Скрипты проекта; без defer/async для максимальной совместимости WebView -->
+  <script src="app.js?v=2025.09.24-06"></script>
 </body>
 </html>
