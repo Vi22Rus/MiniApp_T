@@ -1,634 +1,86 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trip.com - Поиск авиабилетов, отелей и туров</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--tg-theme-bg-color, #f5f5f5);
-            color: var(--tg-theme-text-color, #000);
-            line-height: 1.4;
-        }
-
-        .app {
-            max-width: 100%;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #0f82d6, #1e90ff);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo h1 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .language-selector select {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-
-        .nav-tabs {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
-            background: #e0e0e0;
-            padding: 0;
-        }
-
-        .tab-btn {
-            background: white;
-            border: none;
-            padding: 15px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .tab-btn:hover {
-            background: #f0f8ff;
-        }
-
-        .tab-btn.active {
-            background: #0f82d6;
-            color: white;
-        }
-
-        .tab-icon {
-            font-size: 18px;
-        }
-
-        .tab-text {
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .content {
-            padding: 20px;
-        }
-
-        .search-form {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #333;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.2s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #0f82d6;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .search-btn {
-            width: 100%;
-            background: #0f82d6;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .search-btn:hover {
-            background: #0d6bb8;
-        }
-
-        .popular-routes {
-            margin-top: 20px;
-        }
-
-        .routes-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .route-card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .route-info {
-            flex: 1;
-        }
-
-        .route-path {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .route-duration {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .route-price {
-            font-weight: 600;
-            color: #0f82d6;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .autocomplete-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-
-        .autocomplete-item {
-            padding: 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .autocomplete-item:hover {
-            background: #f0f8ff;
-        }
-
-        .form-group-relative {
-            position: relative;
-        }
-
-        .result-url {
-            background: #f0f8ff;
-            border: 1px solid #0f82d6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            word-break: break-all;
-        }
-
-        .result-url a {
-            color: #0f82d6;
-            text-decoration: none;
-        }
-
-        @media (max-width: 480px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .nav-tabs {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Планер Паттайя</title>
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; }
+    .tabs { display:flex; background:#f0f0f0; }
+    .tab { flex:1; text-align:center; padding:12px; cursor:pointer; }
+    .tab.active { background:#fff; border-bottom:2px solid #007bff; }
+    .content { padding:16px; }
+    .hidden { display:none; }
+    table { width:100%; border-collapse:collapse; }
+    table th, table td { border:1px solid #ddd; padding:8px; text-align:center; }
+    ul { padding-left: 20px; }
+    ul li { margin-bottom:8px; }
+  </style>
 </head>
 <body>
-    <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="logo">
-                <h1>Trip.com</h1>
-            </div>
-            <div class="language-selector">
-                <select id="languageSelect">
-                    <option value="ru">Русский</option>
-                    <option value="zh">中文</option>
-                    <option value="ar">العربية</option>
-                    <option value="en">English</option>
-                </select>
-            </div>
-        </header>
 
-        <!-- Navigation Tabs -->
-        <nav class="nav-tabs">
-            <button class="tab-btn active" data-tab="flights">
-                <span class="tab-icon">✈️</span>
-                <span class="tab-text">Авиабилеты</span>
-            </button>
-            <button class="tab-btn" data-tab="hotels">
-                <span class="tab-icon">🏨</span>
-                <span class="tab-text">Отели</span>
-            </button>
-            <button class="tab-btn" data-tab="trains">
-                <span class="tab-icon">🚄</span>
-                <span class="tab-text">Поезда</span>
-            </button>
-            <button class="tab-btn" data-tab="cars">
-                <span class="tab-icon">🚗</span>
-                <span class="tab-text">Аренда авто</span>
-            </button>
-            <button class="tab-btn" data-tab="tours">
-                <span class="tab-icon">🎯</span>
-                <span class="tab-text">Экскурсии</span>
-            </button>
-            <button class="tab-btn" data-tab="transfers">
-                <span class="tab-icon">🚐</span>
-                <span class="tab-text">Трансферы</span>
-            </button>
-        </nav>
+  <div class="tabs">
+    <div class="tab active" data-tab="calendar">Календарь</div>
+    <div class="tab" data-tab="tips">Советы</div>
+    <div class="tab" data-tab="contacts">Контакты</div>
+  </div>
 
-        <!-- Main Content -->
-        <main class="content">
-            <!-- Flights Tab -->
-            <div id="flights-tab" class="tab-content">
-                <div class="search-form">
-                    <div class="form-row">
-                        <div class="form-group-relative">
-                            <label class="form-label">Откуда</label>
-                            <input type="text" class="form-control city-input" id="flights-from" placeholder="Выберите город отправления">
-                            <div class="autocomplete-dropdown hidden" id="flights-from-dropdown"></div>
-                        </div>
-                        <div class="form-group-relative">
-                            <label class="form-label">Куда</label>
-                            <input type="text" class="form-control city-input" id="flights-to" placeholder="Выберите город назначения">
-                            <div class="autocomplete-dropdown hidden" id="flights-to-dropdown"></div>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Отправление</label>
-                            <input type="date" class="form-control" id="flights-depart">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Возвращение</label>
-                            <input type="date" class="form-control" id="flights-return">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Взрослые</label>
-                            <select class="form-control" id="flights-adults">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Дети</label>
-                            <select class="form-control" id="flights-children">
-                                <option value="0">0</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button class="search-btn" onclick="searchFlights()">Найти авиабилеты</button>
-                    <div id="flights-result"></div>
-                </div>
-            </div>
-
-            <!-- Hotels Tab -->
-            <div id="hotels-tab" class="tab-content hidden">
-                <div class="search-form">
-                    <div class="form-group-relative">
-                        <label class="form-label">Город</label>
-                        <input type="text" class="form-control city-input" id="hotels-city" placeholder="Выберите город">
-                        <div class="autocomplete-dropdown hidden" id="hotels-city-dropdown"></div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Заезд</label>
-                            <input type="date" class="form-control" id="hotels-checkin">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Выезд</label>
-                            <input type="date" class="form-control" id="hotels-checkout">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Номера</label>
-                            <select class="form-control" id="hotels-rooms">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Гости</label>
-                            <select class="form-control" id="hotels-guests">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button class="search-btn" onclick="searchHotels()">Найти отели</button>
-                    <div id="hotels-result"></div>
-                </div>
-            </div>
-
-            <!-- Other tabs similar structure -->
-            <div id="trains-tab" class="tab-content hidden">
-                <div class="search-form">
-                    <p style="text-align: center; color: #666; padding: 40px;">Поиск поездов - в разработке</p>
-                </div>
-            </div>
-
-            <div id="cars-tab" class="tab-content hidden">
-                <div class="search-form">
-                    <p style="text-align: center; color: #666; padding: 40px;">Аренда авто - в разработке</p>
-                </div>
-            </div>
-
-            <div id="tours-tab" class="tab-content hidden">
-                <div class="search-form">
-                    <p style="text-align: center; color: #666; padding: 40px;">Экскурсии - в разработке</p>
-                </div>
-            </div>
-
-            <div id="transfers-tab" class="tab-content hidden">
-                <div class="search-form">
-                    <p style="text-align: center; color: #666; padding: 40px;">Трансферы - в разработке</p>
-                </div>
-            </div>
-
-            <!-- Popular Routes -->
-            <div class="popular-routes">
-                <h3>Популярные направления</h3>
-                <div class="routes-grid" id="popular-routes">
-                    <!-- Будет заполнено JavaScript -->
-                </div>
-            </div>
-        </main>
+  <div class="content">
+    <div id="calendar" class="tab-content">
+      <h2>План на 28 дней</h2>
+      <table>
+        <thead><tr><th>День</th><th>Дата</th><th>Активность</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>29.12.2025</td><td>Пляж Джомтьен + детская зона</td></tr>
+          <tr><td>2</td><td>30.12.2025</td><td>Пляж Вонгамат + водные горки</td></tr>
+          <tr><td>3</td><td>31.12.2025</td><td>Ват Янсангварам + парк</td></tr>
+          <!-- … остальные дни … -->
+          <tr><td>28</td><td>25.01.2026</td><td>Пляж Паттайя</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <script>
-        // Данные городов (без проблем с загрузкой)
-        const cities = [
-            {name: "Москва", code: "MOW", country: "Россия"},
-            {name: "Санкт-Петербург", code: "LED", country: "Россия"},
-            {name: "Сочи", code: "AER", country: "Россия"},
-            {name: "Казань", code: "KZN", country: "Россия"},
-            {name: "Екатеринбург", code: "SVX", country: "Россия"},
-            {name: "Beijing", code: "BJS", country: "China"},
-            {name: "Shanghai", code: "SHA", country: "China"},
-            {name: "Bangkok", code: "BKK", country: "Thailand"},
-            {name: "Phuket", code: "HKT", country: "Thailand"},
-            {name: "Dubai", code: "DXB", country: "UAE"},
-            {name: "Istanbul", code: "IST", country: "Turkey"},
-            {name: "Singapore", code: "SIN", country: "Singapore"},
-            {name: "London", code: "LON", country: "UK"},
-            {name: "Paris", code: "PAR", country: "France"},
-            {name: "New York", code: "NYC", country: "USA"},
-            {name: "Tokyo", code: "TYO", country: "Japan"},
-            {name: "Seoul", code: "SEL", country: "South Korea"}
-        ];
+    <div id="tips" class="tab-content hidden">
+      <h2>Полезные советы</h2>
+      <ul>
+        <li>Берите с собой воду и солнцезащитный крем.</li>
+        <li>Для посещения храмов необходима закрытая одежда.</li>
+        <li>Планируйте поездки на острова заранее.</li>
+        <li>Лучшее время для снорклинга — утро до 11:00.</li>
+        <li>Для прогулок в сады Нонг Нуч берите удобную обувь.</li>
+      </ul>
+    </div>
 
-        const popularRoutes = [
-            {from: "MOW", to: "BKK", fromName: "Москва", toName: "Бангкок", price: 25000, duration: "9ч 30м"},
-            {from: "MOW", to: "DXB", fromName: "Москва", toName: "Дубай", price: 18000, duration: "5ч 15м"},
-            {from: "MOW", to: "IST", fromName: "Москва", toName: "Стамбул", price: 15000, duration: "3ч 45м"},
-            {from: "LED", to: "PAR", fromName: "СПб", toName: "Париж", price: 20000, duration: "3ч 30м"}
-        ];
+    <div id="contacts" class="tab-content hidden">
+      <h2>Контакты</h2>
+      <ul>
+        <li>Club Royal Condominium</li>
+        <li>Туристический офис Паттайи: +66 38 253 000</li>
+        <li>Сервис такси: +66 98 771 7100</li>
+        <li>Pattaya Memorial Hospital: +66 38 428 428</li>
+        <li>Экстренные службы: 1155</li>
+      </ul>
+    </div>
+  </div>
 
-        // Инициализация приложения
-        document.addEventListener('DOMContentLoaded', function() {
-            initTelegramWebApp();
-            initTabs();
-            initAutocomplete();
-            initDates();
-            renderPopularRoutes();
+  <script>
+    // Переключение вкладок
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.dataset.tab;
+        document.querySelectorAll('.tab-content').forEach(c=>{
+          c.id===target ? c.classList.remove('hidden') : c.classList.add('hidden');
         });
+      });
+    });
 
-        function initTelegramWebApp() {
-            if (window.Telegram?.WebApp) {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.expand();
-            }
-        }
+    // Инициализация Telegram WebApp
+    if (window.Telegram?.WebApp) {
+      Telegram.WebApp.ready();
+    }
+  </script>
 
-        function initTabs() {
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const tabId = btn.dataset.tab;
-
-                    // Убираем активный класс со всех кнопок
-                    tabBtns.forEach(b => b.classList.remove('active'));
-                    // Скрываем все контенты
-                    tabContents.forEach(content => content.classList.add('hidden'));
-
-                    // Активируем выбранную вкладку
-                    btn.classList.add('active');
-                    document.getElementById(tabId + '-tab').classList.remove('hidden');
-                });
-            });
-        }
-
-        function initAutocomplete() {
-            const cityInputs = document.querySelectorAll('.city-input');
-
-            cityInputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    const query = this.value.toLowerCase();
-                    const dropdownId = this.id + '-dropdown';
-                    const dropdown = document.getElementById(dropdownId);
-
-                    if (query.length < 1) {
-                        dropdown.classList.add('hidden');
-                        return;
-                    }
-
-                    const filtered = cities.filter(city => 
-                        city.name.toLowerCase().includes(query) ||
-                        city.code.toLowerCase().includes(query)
-                    );
-
-                    if (filtered.length > 0) {
-                        dropdown.innerHTML = filtered.map(city => 
-                            `<div class="autocomplete-item" onclick="selectCity('${this.id}', '${city.name}', '${city.code}')">
-                                ${city.name} (${city.code}) - ${city.country}
-                            </div>`
-                        ).join('');
-                        dropdown.classList.remove('hidden');
-                    } else {
-                        dropdown.classList.add('hidden');
-                    }
-                });
-
-                // Скрыть dropdown при клике вне
-                document.addEventListener('click', function(e) {
-                    if (!input.contains(e.target)) {
-                        const dropdownId = input.id + '-dropdown';
-                        document.getElementById(dropdownId).classList.add('hidden');
-                    }
-                });
-            });
-        }
-
-        function selectCity(inputId, cityName, cityCode) {
-            document.getElementById(inputId).value = cityName;
-            document.getElementById(inputId).dataset.code = cityCode;
-            document.getElementById(inputId + '-dropdown').classList.add('hidden');
-        }
-
-        function initDates() {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const weekLater = new Date(today);
-            weekLater.setDate(weekLater.getDate() + 7);
-
-            const formatDate = (date) => date.toISOString().split('T')[0];
-
-            // Авиабилеты
-            const flightsDepart = document.getElementById('flights-depart');
-            const flightsReturn = document.getElementById('flights-return');
-            if (flightsDepart) flightsDepart.value = formatDate(tomorrow);
-            if (flightsReturn) flightsReturn.value = formatDate(weekLater);
-
-            // Отели
-            const hotelsCheckin = document.getElementById('hotels-checkin');
-            const hotelsCheckout = document.getElementById('hotels-checkout');
-            if (hotelsCheckin) hotelsCheckin.value = formatDate(tomorrow);
-            if (hotelsCheckout) hotelsCheckout.value = formatDate(weekLater);
-        }
-
-        function renderPopularRoutes() {
-            const container = document.getElementById('popular-routes');
-            if (!container) return;
-
-            container.innerHTML = popularRoutes.map(route => `
-                <div class="route-card" onclick="fillFlightForm('${route.from}', '${route.to}', '${route.fromName}', '${route.toName}')">
-                    <div class="route-info">
-                        <div class="route-path">${route.fromName} → ${route.toName}</div>
-                        <div class="route-duration">${route.duration}</div>
-                    </div>
-                    <div class="route-price">от ${route.price.toLocaleString()}₽</div>
-                </div>
-            `).join('');
-        }
-
-        function fillFlightForm(fromCode, toCode, fromName, toName) {
-            // Переключаемся на вкладку авиабилетов
-            document.querySelector('[data-tab="flights"]').click();
-
-            // Заполняем форму
-            const fromInput = document.getElementById('flights-from');
-            const toInput = document.getElementById('flights-to');
-
-            if (fromInput) {
-                fromInput.value = fromName;
-                fromInput.dataset.code = fromCode;
-            }
-            if (toInput) {
-                toInput.value = toName;
-                toInput.dataset.code = toCode;
-            }
-        }
-
-        function searchFlights() {
-            const from = document.getElementById('flights-from').dataset.code || 'MOW';
-            const to = document.getElementById('flights-to').dataset.code || 'BKK';
-            const depart = document.getElementById('flights-depart').value;
-            const returnDate = document.getElementById('flights-return').value;
-            const adults = document.getElementById('flights-adults').value;
-            const children = document.getElementById('flights-children').value;
-
-            let url = `https://www.trip.com/flights/?locale=ru-RU&from=${from}&to=${to}&depart=${depart}&passengers=${adults},${children},0&cabin=economy`;
-
-            if (returnDate) {
-                url += `&return=${returnDate}`;
-            }
-
-            showResult('flights-result', url);
-        }
-
-        function searchHotels() {
-            const city = document.getElementById('hotels-city').dataset.code || 'bangkok';
-            const checkin = document.getElementById('hotels-checkin').value;
-            const checkout = document.getElementById('hotels-checkout').value;
-            const rooms = document.getElementById('hotels-rooms').value;
-            const guests = document.getElementById('hotels-guests').value;
-
-            const url = `https://www.trip.com/hotels/?locale=ru-RU&city=${city.toLowerCase()}&checkin=${checkin}&checkout=${checkout}&rooms=${rooms}&guests=${guests},0`;
-
-            showResult('hotels-result', url);
-        }
-
-        function showResult(containerId, url) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = `
-                <div class="result-url">
-                    <p><strong>Ссылка для поиска:</strong></p>
-                    <a href="${url}" target="_blank">${url}</a>
-                    <br><br>
-                    <button onclick="window.open('${url}', '_blank')" style="background: #0f82d6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                        Открыть Trip.com
-                    </button>
-                </div>
-            `;
-        }
-    </script>
 </body>
 </html>
