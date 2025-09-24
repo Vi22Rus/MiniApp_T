@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip.com - Поиск авиабилетов, отелей и туров</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Trip.com</h1>
+                </div>
+                <div class="language-selector">
+                    <select id="languageSelect" class="form-control">
+                        <option value="ru">Русский</option>
+                        <option value="zh">中文</option>
+                        <option value="ar">العربية</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="flights">
+                <span class="tab-icon">✈️</span>
+                <span class="tab-text" data-key="flights">Авиабилеты</span>
+            </button>
+            <button class="tab-btn" data-tab="hotels">
+                <span class="tab-icon">🏨</span>
+                <span class="tab-text" data-key="hotels">Отели</span>
+            </button>
+            <button class="tab-btn" data-tab="trains">
+                <span class="tab-icon">🚄</span>
+                <span class="tab-text" data-key="trains">Поезда</span>
+            </button>
+            <button class="tab-btn" data-tab="cars">
+                <span class="tab-icon">🚗</span>
+                <span class="tab-text" data-key="cars">Аренда авто</span>
+            </button>
+            <button class="tab-btn" data-tab="tours">
+                <span class="tab-icon">🎯</span>
+                <span class="tab-text" data-key="tours">Экскурсии</span>
+            </button>
+            <button class="tab-btn" data-tab="transfers">
+                <span class="tab-icon">🚐</span>
+                <span class="tab-text" data-key="transfers">Трансферы</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Flights Tab -->
+            <div id="flights" class="tab-content active">
+                <div class="search-form">
+                    <div class="form-group">
+                        <label class="form-label" data-key="from">Откуда</label>
+                        <input type="text" id="flightFrom" class="form-control city-input" placeholder="Выберите город отправления">
+                        <div class="autocomplete-dropdown" id="flightFromDropdown"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-key="to">Куда</label>
+                        <input type="text" id="flightTo" class="form-control city-input" placeholder="Выберите город назначения">
+                        <div class="autocomplete-dropdown" id="flightToDropdown"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" data-key="departure">Отправление</label>
+                            <input type="date" id="flightDepart" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-key="return">Возвращение</label>
+                            <input type="date" id="flightReturn" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" data-key="adults">Взрослые</label>
+                            <select id="flightAdults" class="form-control">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-key="children">Дети</label>
+                            <select id="flightChildren" class="form-control">
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-key="infants">Младенцы</label>
+                            <select id="flightInfants" class="form-control">
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary btn--full-width search-btn" onclick="searchFlights()">
+                        <span data-key="search">Найти</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hotels Tab -->
+            <div id="hotels" class="tab-content">
+                <div class="search-form">
+                    <div class="form-group">
+                        <label class="form-label">Город</label>
+                        <input type="text" id="hotelCity" class="form-control city-input" placeholder="Выберите город">
+                        <div class="autocomplete-dropdown" id="hotelCityDropdown"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" data-key="checkin">Заезд</label>
+                            <input type="date" id="hotelCheckin" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-key="checkout">Выезд</label>
+                            <input type="date" id="hotelCheckout" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" data-key="rooms">Номера</label>
+                            <select id="hotelRooms" class="form-control">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-key="adults">Взрослые</label>
+                            <select id="hotelAdults" class="form-control">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-key="children">Дети</label>
+                            <select id="hotelChildren" class="form-control">
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary btn--full-width search-btn" onclick="searchHotels()">
+                        <span data-key="search">Найти</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trains Tab -->
+            <div id="trains" class="tab-content">
+                <div class="search-form">
+                    <div class="form-group">
+                        <label class="form-label" data-key="from">Откуда</label>
+                        <input type="text" id="trainFrom" class="form-control city-input" placeholder="Выберите станцию отправления">
+                        <div class="autocomplete-dropdown" id="trainFromDropdown"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-key="to">Куда</label>
+                        <input type="text" id="trainTo" class="form-control city-input" placeholder="Выберите станцию назначения">
+                        <div class="autocomplete-dropdown" id="trainToDropdown"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" data-key="departure">Отправление</label>
+                            <input type="date" id="trainDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-key="passengers">Пассажиры</label>
+                            <select id="trainPassengers" class="form-control">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary btn--full-width search-btn" onclick="searchTrains()">
+                        <span data-key="search">Найти</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cars Tab -->
+            <div id="cars" class="tab-content">
+                <div class="search-form">
+                    <div class="form-group">
+                        <label class="form-label">Место получения</label>
+                        <input type="text" id="carPickup" class="form-control city-input" placeholder="Выберите место получения">
+                        <div class="autocomplete-dropdown" id="carPickupDropdown"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Место возврата</label>
+                        <input type="text" id="carDropoff" class="form-control city-input" placeholder="Выберите место возврата">
+                        <div class="autocomplete-dropdown" id="carDropoffDropdown"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Дата получения</label>
+                            <input type="date" id="carPickupDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Время получения</label>
+                            <input type="time" id="carPickupTime" class="form-control" value="10:00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Дата возврата</label>
+                            <input type="date" id="carDropoffDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Время возврата</label>
+                            <input type="time" id="carDropoffTime" class="form-control" value="10:00">
+                        </div>
+                    </div>
+                    <button class="btn btn--primary btn--full-width search-btn" onclick="searchCars()">
+                        <span data-key="search">Найти</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tours Tab -->
+            <div id="tours" class="tab-content">
+                <div class="search-form">
+                    <div class="form-group">
+                        <label class="form-label">Город</label>
+                        <input type="text" id="tourCity" class="form-control city-input" placeholder="Выберите город">
+                        <div class="autocomplete-dropdown" id="tourCityDropdown"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Дата</label>
+                            <input type="date" id="tourDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-key="passengers">Пассажиры</label>
+                            <select id="tourPassengers" class="form-control">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary btn--full-width search-btn" onclick="searchTours()">
+                        <span data-key="search">Найти</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transfers Tab -->
+            <div id="transfers" class="tab-content">
+                <div class="search-form">
+                    <div class="form-group">
+                        <label class="form-label" data-key="from">Откуда</label>
+                        <input type="text" id="transferFrom" class="form-control city-input" placeholder="Место получения">
+                        <div class="autocomplete-dropdown" id="transferFromDropdown"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-key="to">Куда</label>
+                        <input type="text" id="transferTo" class="form-control city-input" placeholder="Место назначения">
+                        <div class="autocomplete-dropdown" id="transferToDropdown"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Дата</label>
+                            <input type="date" id="transferDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Время</label>
+                            <input type="time" id="transferTime" class="form-control" value="14:00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-key="passengers">Пассажиры</label>
+                        <select id="transferPassengers" class="form-control">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                    <button class="btn btn--primary btn--full-width search-btn" onclick="searchTransfers()">
+                        <span data-key="search">Найти</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Popular Routes -->
+            <section class="popular-routes">
+                <h2 data-key="popular_routes">Популярные направления</h2>
+                <div class="routes-grid" id="popularRoutes">
+                    <!-- Routes will be loaded by JavaScript -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Loading indicator -->
+        <div id="loading" class="loading hidden">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <!-- Toast notifications -->
+        <div id="toast" class="toast hidden"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
