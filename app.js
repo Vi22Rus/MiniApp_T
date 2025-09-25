@@ -85,7 +85,7 @@
   var todayBtn = $('#todayBtn');
   var resetFilters = $('#resetFilters');
 
-  // На всякий случай жёстко скрываем модалку на старте (если CSS не загрузился)
+  // На всякий — жёстко скрываем модалку при старте
   if (overlay) overlay.style.display = 'none';
   if (details) details.style.display = 'none';
 
@@ -177,7 +177,6 @@
     if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred==='function'){
       try { tg.HapticFeedback.impactOccurred('medium'); } catch(e){}
     }
-    // Независимо от CSS, показываем модалку инлайном
     overlay.style.display='block'; details.style.display='block';
     overlay.classList.remove('hidden'); details.classList.remove('hidden');
     overlay.setAttribute('aria-hidden','false');
@@ -191,7 +190,7 @@
   }
   on(overlay,'click',closeDetails); on(closeBtn,'click',closeDetails);
 
-  // Открытие только по клику + «tap‑intent» не блокирует скролл
+  // Нажатие по карточке (только click) + «tap‑intent» без блокировки скролла
   on(cardsWrap,'click',function(e){
     var card=e.target.closest?e.target.closest('.card'):null; if(!card) return;
     openDetails(Number(card.getAttribute('data-index')));
