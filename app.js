@@ -1,5 +1,7 @@
 (function(){
   'use strict';
+
+  // Helpers
   function $(sel, root){ return (root||document).querySelector(sel); }
   function $all(sel, root){ return (root||document).querySelectorAll(sel); }
   function on(el, evt, cb, opt){ if (el) el.addEventListener(evt, cb, opt||false); }
@@ -12,7 +14,7 @@
   var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
   if (tg){ if (typeof tg.expand==='function') tg.expand(); if (typeof tg.ready==='function') tg.ready(); }
 
-  // Темизация и выравнивание цветов web‑view под тему Telegram
+  // Темизация и выравнивание цветов
   function applyTheme(){
     if (!tg || !tg.themeParams) return;
     var p = tg.themeParams;
@@ -27,7 +29,7 @@
   applyTheme();
   if (tg && typeof tg.onEvent==='function') tg.onEvent('themeChanged', function(){ applyTheme(); });
 
-  // BackButton (нативная навигация)
+  // BackButton
   var backBtn = tg && tg.BackButton ? tg.BackButton : null;
   function showBack(){ if (backBtn && typeof backBtn.show==='function') backBtn.show(); }
   function hideBack(){ if (backBtn && typeof backBtn.hide==='function') backBtn.hide(); }
@@ -83,7 +85,11 @@
   var todayBtn = $('#todayBtn');
   var resetFilters = $('#resetFilters');
 
-  // Time helpers
+  // На всякий случай жёстко скрываем модалку на старте (если CSS не загрузился)
+  if (overlay) overlay.style.display = 'none';
+  if (details) details.style.display = 'none';
+
+  // Время-помощники
   function add(hh, mm, addMin){ var d = new Date(2000,0,1, hh, mm, 0); d.setMinutes(d.getMinutes()+addMin); return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
   function t(s){ var a=s.split(':'); return {h:+a[0], m:+a[1]}; }
 
@@ -116,7 +122,7 @@
     return rows;
   }
 
-  // Render
+  // Рендер карточек
   function renderCards(list){
     cardsWrap.innerHTML='';
     for (var i=0;i<list.length;i++){
@@ -131,7 +137,7 @@
   }
   renderCards(activities);
 
-  // Tabs
+  // Вкладки
   function showTab(id){
     var panels=$all('.tab-content'); for (var i=0;i<panels.length;i++) panels[i].classList.add('hidden');
     var p=document.getElementById(id); if (p) p.classList.remove('hidden');
@@ -141,7 +147,7 @@
     (function(btn){ on(btn,'click',function(){ showTab(btn.dataset.tab); }); })(tabs[tIndex]);
   }
 
-  // Filters
+  // Фильтры
   function applyFilter(type){
     for (var i=0;i<filters.length;i++){
       var active=(filters[i].dataset.filter===type)||(type==='all'&&filters[i].dataset.filter==='all');
@@ -161,7 +167,7 @@
   }
   on(resetFilters,'click',function(){ applyFilter('all'); });
 
-  // Dialog + Back + Haptics
+  // Диалог + Back + Haptics
   function openDetails(idx){
     var act=activities[idx]; if (!act) return;
     detailsTitle.textContent='День '+(idx+1)+' • '+act.date;
@@ -171,16 +177,21 @@
     if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred==='function'){
       try { tg.HapticFeedback.impactOccurred('medium'); } catch(e){}
     }
+    // Независимо от CSS, показываем модалку инлайном
+    overlay.style.display='block'; details.style.display='block';
     overlay.classList.remove('hidden'); details.classList.remove('hidden');
+    overlay.setAttribute('aria-hidden','false');
     showBack();
   }
   function closeDetails(){
+    overlay.style.display='none'; details.style.display='none';
     overlay.classList.add('hidden'); details.classList.add('hidden');
+    overlay.setAttribute('aria-hidden','true');
     hideBack();
   }
   on(overlay,'click',closeDetails); on(closeBtn,'click',closeDetails);
 
-  // Открытие только по клику + «tap‑intent» без блокировки скролла
+  // Открытие только по клику + «tap‑intent» не блокирует скролл
   on(cardsWrap,'click',function(e){
     var card=e.target.closest?e.target.closest('.card'):null; if(!card) return;
     openDetails(Number(card.getAttribute('data-index')));
@@ -197,7 +208,7 @@
     }
   });
 
-  // Today
+  // «Сегодня»
   on(todayBtn,'click',function(){
     var first = $('#cards .card'); if(first){ first.scrollIntoView({behavior:'smooth',block:'center'}); first.style.filter='brightness(1.08)'; setTimeout(function(){ first.style.filter=''; }, 600); }
   });
