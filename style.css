@@ -48,6 +48,7 @@ body.tg-dark{
   border-color:transparent; box-shadow:0 6px 18px rgba(79,70,229,.25);
 }
 
+/* Content */
 .content{padding:16px}
 
 /* Filters */
@@ -80,6 +81,9 @@ body.tg-dark{
 
 /* Sections */
 .section, .list, .grid-list, #tips, #contacts { color: var(--text); }
+
+/* Версия внизу "Контактов" */
+.contacts-version{margin-top:16px;padding:8px 12px;font-size:12px;color:var(--muted);text-align:left;border-top:1px solid rgba(0,0,0,.08)}
 
 /* Dialog */
 .empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:var(--radius)}
