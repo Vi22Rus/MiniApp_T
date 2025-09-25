@@ -11,9 +11,15 @@
   }
 
   ready(function init(){
+    // Утилиты DOM
     const $ = (s,r)=> (r||document).querySelector(s);
     const $all = (s,r)=> (r||document).querySelectorAll(s);
     const on = (e,t,c,o)=>{ if(e) e.addEventListener(t,c,o||false); };
+
+    // Вспомогательные функции времени
+    const add = (hh,mm,addMin)=>{ const d=new Date(2000,0,1,hh,mm,0); d.setMinutes(d.getMinutes()+addMin); return (`0${d.getHours()}`).slice(-2)+':'+(`0${d.getMinutes()}`).slice(-2); };
+    const parseTime = (s)=>{ const a=s.split(':'); return {h:+a[0], m:+a[1]}; };
+    const parseDMY = (dmy)=>{ const m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(dmy); if(!m) return null; return new Date(+m[3],+m[2]-1,+m[1],0,0,0,0); };
 
     // Telegram SDK
     const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
@@ -26,8 +32,10 @@
     hideBack();
     tg && tg.onEvent && tg.onEvent('back_button_pressed', ()=> closeDetails());
 
-    // Данные поездки (с базовой практической инфой)
+    // Полный список активностей (как было) + несколько записей с практической инфой
     const activities = [
+      { type:'sea',   date:'29.12.2025', text:'Пляж Джомтьен + детская зона' },
+      { type:'sea',   date:'30.12.2025', text:'Пляж Вонгамат + водные горки' },
       { type:'sight', date:'31.12.2025', title:'Ват Ян (Wat Yansangwararam)',
         gps:{lat:12.7889,lng:100.9581}, open:'ежедн. ~08:00–17:00', price:'донейшн',
         transport:[
@@ -37,25 +45,48 @@
         lunch:[ 'Фудкорт Central Festival (11:00–23:00)' ],
         tips:[ 'Дресс‑код: закрытые плечи/колени', 'Пить бутилированную воду' ]
       },
-      { type:'sea', date:'01.01.2026', title:'Пляж Джомтьен',
+      { type:'sea',   date:'01.01.2026', title:'Пляж Джомтьен',
         gps:{lat:12.8750,lng:100.8889}, open:'24/7', price:'бесплатно',
         transport:[ 'Сонгтео центр↔Джомтьен: 10 бат', 'Белые сонгтео по Сукхумвит: 20 бат' ],
         lunch:[ 'The Glass House: блюда ~200–500 бат' ],
         tips:[ 'Лучшее время: до 11:00 и после 16:00', 'SPF и вода 1 л/чел.' ]
       },
+      { type:'sea',   date:'02.01.2026', text:'Морская прогулка к Ко Лан (снорклинг)' },
+      { type:'sight', date:'03.01.2026', text:'Сад Нонг Нуч + шоу слонов' },
+      { type:'sea',   date:'04.01.2026', text:'Пляж Джомтьен' },
+      { type:'sea',   date:'05.01.2026', text:'Пляж Вонгамат + аренда байка' },
+      { type:'sight', date:'06.01.2026', text:'Ват Кхао Пхра Бат + обзорная площадка' },
+      { type:'sea',   date:'07.01.2026', text:'Морская прогулка к Ко Сичанг' },
+      { type:'sea',   date:'08.01.2026', text:'Пляж Паттайя' },
+      { type:'sight', date:'09.01.2026', text:'Dolphin World + детская зона' },
+      { type:'sea',   date:'10.01.2026', text:'Пляж Джомтьен' },
+      { type:'sight', date:'11.01.2026', text:'Батискаф (12.969175,100.888124)' },
+      { type:'sight', date:'12.01.2026', text:'Art in Paradise + плавучий рынок' },
+      { type:'sea',   date:'13.01.2026', text:'Пляж Вонгамат' },
+      { type:'sea',   date:'14.01.2026', text:'Пляж Паттайя' },
+      { type:'sight', date:'15.01.2026', text:'Мини-Сиам + детские аттракционы' },
+      { type:'sea',   date:'16.01.2026', text:'Морская прогулка к Ко Лан' },
+      { type:'sea',   date:'17.01.2026', text:'Пляж Джомтьен' },
+      { type:'sight', date:'18.01.2026', text:'Sea Life Pattaya (аквариум)' },
+      { type:'sea',   date:'19.01.2026', text:'Пляж Вонгамат' },
+      { type:'sea',   date:'20.01.2026', text:'Пляж Паттайя' },
+      { type:'sight', date:'21.01.2026', text:'Ват Пхра Яй + парк Люксор' },
+      { type:'sea',   date:'22.01.2026', text:'Пляж Джомтьен' },
+      { type:'sea',   date:'23.01.2026', text:'Пляж Вонгамат' },
       { type:'sight', date:'24.01.2026', title:'Central Festival Pattaya',
         gps:{lat:12.934546,lng:100.883775}, open:'ежедн. 11:00–23:00', price:'вход свободный',
         transport:[ 'Сонгтео по Beach/Second Rd: 10 бат' ],
         lunch:[ 'Фудкорт: большой выбор, кондиционер' ],
         tips:[ 'Удобный ориентир в центре', 'Есть зоны отдыха' ]
       },
-      // Добавьте остальные дни по аналогии…
-      { type:'sea',   date:'29.12.2025', title:'Пляж Вонгамат' },
-      { type:'sight', date:'03.01.2026', title:'Сад Нонг Нуч' },
-      { type:'sea',   date:'02.01.2026', title:'Ко Лан (снорклинг)' },
-      { type:'sight', date:'18.01.2026', title:'Sea Life Pattaya' },
-      { type:'sea',   date:'25.01.2026', title:'Пляж Паттайя' }
+      { type:'sea',   date:'25.01.2026', text:'Пляж Паттайя' }
     ];
+
+    // Упорядочить по дате по возрастанию
+    activities.sort((a,b)=>{
+      const da = parseDMY(a.date), db = parseDMY(b.date);
+      return (da && db) ? (da - db) : 0;
+    });
 
     // DOM
     const cardsWrap = $('#cards'), skeletons = $('#skeletons'), emptyState = $('#emptyState'), filters = $all('.filter'), tabs = $all('.tab');
@@ -67,11 +98,6 @@
     // Принудительно скрываем модалку
     if (overlay){ overlay.style.display='none'; overlay.classList.add('hidden'); overlay.setAttribute('aria-hidden','true'); }
     if (details){ details.style.display='none'; details.classList.add('hidden'); }
-
-    // Helpers
-    const add = (hh,mm,addMin)=>{ const d=new Date(2000,0,1,hh,mm,0); d.setMinutes(d.getMinutes()+addMin); return (`0${d.getHours()}`).slice(-2)+':'+(`0${d.getMinutes()}`).slice(-2); };
-    const parseTime = (s)=>{ const a=s.split(':'); return {h:+a[0], m:+a[1]}; };
-    const parseDMY = (dmy)=>{ const m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(dmy); if(!m) return null; return new Date(+m[3],+m[2]-1,+m[1],0,0,0,0); };
 
     // Ближайшая будущая дата (UTC‑полуночь)
     function nextFutureDate(list){
@@ -93,17 +119,17 @@
       const startTs = nextFutureDate(activities);
       if (startTs===null){ countdownBtn.textContent='🏝️ Поездка началась'; return; }
       const now = new Date();
-      const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()); // UTC‑полуночь [MDN]
+      const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()); // UTC‑полуночь
       const diffDays = Math.ceil((startTs - todayUTC)/86400000);
       countdownBtn.textContent = (diffDays>0) ? `⏳ До поездки: ${diffDays} дней` : '🎒 Поездка сегодня';
     }
-    updateCountdown(); setInterval(updateCountdown, 3600000); // раз в час
+    updateCountdown(); setInterval(updateCountdown, 3600000);
 
     // Иконки по типу
     const ICONS = { sea:['🏖️','🌊','🐠','⛱️','🛶'], sight:['🏛️','🗿','🗺️','🏯','📸'] };
     const pickIcon = (type, i)=> (ICONS[type]||['📌'])[ i % (ICONS[type]||['📌']).length ];
 
-    // Расписание дня с конкретикой
+    // Расписание дня с конкретикой (если есть)
     function generateSchedule(act){
       const departAt='09:00', travelSea=40, travelSight=30, buf=10;
       const rows=[];
@@ -164,7 +190,7 @@
     on(overlay,'click', (e)=>{ if(e.target===overlay) closeDetails(); });
     on(closeBtn,'click',(e)=>{ e.preventDefault(); e.stopPropagation(); closeDetails(); });
 
-    // Рендер карточек (без порядковых номеров — только иконка и дата)
+    // Рендер карточек (без порядковых номеров — иконка + дата)
     function renderCards(list){
       cardsWrap.innerHTML='';
       if (!list || list.length===0){
@@ -217,7 +243,7 @@
     for (let i=0;i<filters.length;i++){ const btn=filters[i]; on(btn,'click', ()=> applyFilter(btn.dataset.filter)); }
     on(resetFilters,'click', ()=> applyFilter('all'));
 
-    // Ссылки на блюда (раздел «Советы»): открывать во встроенном браузере Telegram
+    // Ссылки на блюда (открытие во встроенном браузере Telegram при поддержке)
     document.addEventListener('click', function(e){
       const a = e.target.closest && e.target.closest('.dish-link');
       if (!a) return;
