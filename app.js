@@ -3,45 +3,77 @@
   function $(s,r){return (r||document).querySelector(s)} function $all(s,r){return (r||document).querySelectorAll(s)} function on(e,t,c,o){e&&e.addEventListener(t,c,o||false)}
 
   // Версия
-  var ver=(document.body&&document.body.dataset&&document.body.dataset.version)?document.body.dataset.version:'dev'; var verEl=$('#appVersion'); if(verEl) verEl.textContent='v'+ver;
+  var ver=(document.body&&document.body.dataset&&document.body.dataset.version)?document.body.dataset.version:'dev';
+  var verEl=$('#appVersion'); if(verEl) verEl.textContent='v'+ver;
 
   // Telegram SDK
-  var tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null; if(tg){tg.expand&&tg.expand(); tg.ready&&tg.ready();}
+  var tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;
+  if(tg){ tg.expand&&tg.expand(); tg.ready&&tg.ready(); }
 
   // Контраст helpers
   function hexToRgb(hex){ if(!hex) return null; var h=hex.replace('#',''); if(h.length===3) h=h.split('').map(function(c){return c+c}).join(''); var n=parseInt(h,16); return {r:(n>>16)&255,g:(n>>8)&255,b:n&255}; }
   function luminance(rgb){ if(!rgb) return 0; function f(v){v=v/255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4);} var r=f(rgb.r),g=f(rgb.g),b=f(rgb.b); return 0.2126*r+0.7152*g+0.0722*b; }
-  function ensureContrast(bgHex,textHex){ var bg=hexToRgb(bgHex),tx=hexToRgb(textHex); if(!bg||!tx)return null; var L1=Math.max(luminance(bg),luminance(tx))+0.05, L2=Math.min(luminance(bg),luminance(tx))+0.05; return (L1/L2)>=4.5; }
-  function pickTextForBg(bgHex){ var dark='#111111', light='#e5e7eb'; var okL=ensureContrast(bgHex,light), okD=ensureContrast(bgHex,dark); if(okL&&!okD)return light; if(okD&&!okL)return dark; var lum=luminance(hexToRgb(bgHex)); return lum<0.5?light:dark; }
+  function ensureContrast(bgHex,textHex){ var bg=hexToRgb(bgHex),tx=hexToRgb(textHex); if(!bg||!tx) return null; var L1=Math.max(luminance(bg),luminance(tx))+0.05, L2=Math.min(luminance(bg),luminance(tx))+0.05; return (L1/L2)>=4.5; }
+  function pickTextForBg(bgHex){ var dark='#111111', light='#0b1220'; var okL=ensureContrast(bgHex,light), okD=ensureContrast(bgHex,dark); if(okL&&!okD) return light; if(okD&&!okL) return dark; var lum=luminance(hexToRgb(bgHex)); return lum<0.5?light:dark; }
 
-  // Темизация из themeParams
+  // Темизация
   function applyTheme(){
     if(!tg||!tg.themeParams) return;
     var p=tg.themeParams;
     if(p.bg_color){ document.documentElement.style.setProperty('--bg', p.bg_color); document.body.style.backgroundColor=p.bg_color; }
-    var text=p.text_color?p.text_color:pickTextForBg(p.bg_color||'#0f172a'); if(text) document.documentElement.style.setProperty('--text', text);
+    var text=p.text_color?p.text_color:pickTextForBg(p.bg_color||'#ffffff'); if(text) document.documentElement.style.setProperty('--text', text);
     if(p.hint_color) document.documentElement.style.setProperty('--muted', p.hint_color);
     if(p.button_color) document.documentElement.style.setProperty('--accent', p.button_color);
     if(p.button_text_color) document.documentElement.style.setProperty('--accent-2', p.button_text_color);
-    var isDark=(function(){ var rgb=hexToRgb(p.bg_color||'#0f172a'); return luminance(rgb)<0.5; })(); document.body.classList.toggle('tg-dark', !!isDark);
+    var isDark=(function(){ var rgb=hexToRgb(p.bg_color||'#ffffff'); return luminance(rgb)<0.5; })();
+    document.body.classList.toggle('tg-dark', !!isDark);
     if(typeof tg.setHeaderColor==='function') tg.setHeaderColor('bg_color');
     if(typeof tg.setBackgroundColor==='function') tg.setBackgroundColor('bg_color');
   }
   applyTheme();
-  if(tg&&typeof tg.onEvent==='function'){ tg.onEvent('themeChanged', function(){ applyTheme(); }); }
+  tg&&tg.onEvent&&tg.onEvent('themeChanged', function(){ applyTheme(); });
 
   // BackButton
   var backBtn=tg&&tg.BackButton?tg.BackButton:null; function showBack(){backBtn&&backBtn.show&&backBtn.show()} function hideBack(){backBtn&&backBtn.hide&&backBtn.hide()} hideBack();
-  if(tg&&tg.onEvent){ tg.onEvent('back_button_pressed', function(){ closeDetails(); }); }
+  tg&&tg.onEvent&&tg.onEvent('back_button_pressed', function(){ closeDetails(); });
 
   // Данные
-  var activities=[{type:'sea',date:'29.12.2025',text:'Пляж Джомтьен + детская зона'},{type:'sea',date:'30.12.2025',text:'Пляж Вонгамат + водные горки'},{type:'sight',date:'31.12.2025',text:'Ват Янсангварам + прогулка по парку'},{type:'sea',date:'01.01.2026',text:'Пляж Паттайя + Underwater World'},{type:'sea',date:'02.01.2026',text:'Морская прогулка к Ко Лан (снорклинг)'},{type:'sight',date:'03.01.2026',text:'Сад Нонг Нуч + шоу слонов'},{type:'sea',date:'04.01.2026',text:'Пляж Джомтьен'},{type:'sea',date:'05.01.2026',text:'Пляж Вонгамат + аренда байка'},{type:'sight',date:'06.01.2026',text:'Ват Кхао Пхра Бат + обзорная площадка'},{type:'sea',date:'07.01.2026',text:'Морская прогулка к Ко Сичанг'},{type:'sea',date:'08.01.2026',text:'Пляж Паттайя'},{type:'sight',date:'09.01.2026',text:'Dolphin World + детская зона'},{type:'sea',date:'10.01.2026',text:'Пляж Джомтьен'},{type:'sight',date:'11.01.2026',text:'Батискаф (12.969175,100.888124)'},{type:'sight',date:'12.01.2026',text:'Art in Paradise + плавучий рынок'},{type:'sea',date:'13.01.2026',text:'Пляж Вонгамат'},{type:'sea',date:'14.01.2026',text:'Пляж Паттайя'},{type:'sight',date:'15.01.2026',text:'Мини-Сиам + детские аттракционы'},{type:'sea',date:'16.01.2026',text:'Морская прогулка к Ко Лан'},{type:'sea',date:'17.01.2026',text:'Пляж Джомтьен'},{type:'sight',date:'18.01.2026',text:'Sea Life Pattaya (аквариум)'},{type:'sea',date:'19.01.2026',text:'Пляж Вонгамат'},{type:'sea',date:'20.01.2026',text:'Пляж Паттайя'},{type:'sight',date:'21.01.2026',text:'Ват Пхра Яй + парк Люксор'},{type:'sea',date:'22.01.2026',text:'Пляж Джомтьен'},{type:'sea',date:'23.01.2026',text:'Пляж Вонгамат'},{type:'sight',date:'24.01.2026',text:'Central Festival + фуд-корт'},{type:'sea',date:'25.01.2026',text:'Пляж Паттайя'}];
+  var activities=[
+    {type:'sea',date:'29.12.2025',text:'Пляж Джомтьен + детская зона'},
+    {type:'sea',date:'30.12.2025',text:'Пляж Вонгамат + водные горки'},
+    {type:'sight',date:'31.12.2025',text:'Ват Янсангварам + прогулка по парку'},
+    {type:'sea',date:'01.01.2026',text:'Пляж Паттайя + Underwater World'},
+    {type:'sea',date:'02.01.2026',text:'Морская прогулка к Ко Лан (снорклинг)'},
+    {type:'sight',date:'03.01.2026',text:'Сад Нонг Нуч + шоу слонов'},
+    {type:'sea',date:'04.01.2026',text:'Пляж Джомтьен'},
+    {type:'sea',date:'05.01.2026',text:'Пляж Вонгамат + аренда байка'},
+    {type:'sight',date:'06.01.2026',text:'Ват Кхао Пхра Бат + обзорная площадка'},
+    {type:'sea',date:'07.01.2026',text:'Морская прогулка к Ко Сичанг'},
+    {type:'sea',date:'08.01.2026',text:'Пляж Паттайя'},
+    {type:'sight',date:'09.01.2026',text:'Dolphin World + детская зона'},
+    {type:'sea',date:'10.01.2026',text:'Пляж Джомтьен'},
+    {type:'sight',date:'11.01.2026',text:'Батискаф (12.969175,100.888124)'},
+    {type:'sight',date:'12.01.2026',text:'Art in Paradise + плавучий рынок'},
+    {type:'sea',date:'13.01.2026',text:'Пляж Вонгамат'},
+    {type:'sea',date:'14.01.2026',text:'Пляж Паттайя'},
+    {type:'sight',date:'15.01.2026',text:'Мини-Сиам + детские аттракционы'},
+    {type:'sea',date:'16.01.2026',text:'Морская прогулка к Ко Лан'},
+    {type:'sea',date:'17.01.2026',text:'Пляж Джомтьен'},
+    {type:'sight',date:'18.01.2026',text:'Sea Life Pattaya (аквариум)'},
+    {type:'sea',date:'19.01.2026',text:'Пляж Вонгамат'},
+    {type:'sea',date:'20.01.2026',text:'Пляж Паттайя'},
+    {type:'sight',date:'21.01.2026',text:'Ват Пхра Яй + парк Люксор'},
+    {type:'sea',date:'22.01.2026',text:'Пляж Джомтьен'},
+    {type:'sea',date:'23.01.2026',text:'Пляж Вонгамат'},
+    {type:'sight',date:'24.01.2026',text:'Central Festival + фуд-корт'},
+    {type:'sea',date:'25.01.2026',text:'Пляж Паттайя'}
+  ];
 
   // DOM
   var cardsWrap=$('#cards'), skeletons=$('#skeletons'), emptyState=$('#emptyState'), filters=$all('.filter'), tabs=$all('.tab');
   var overlay=$('#overlay'), details=$('#details'), closeBtn=$('#closeBtn'), detailsTitle=$('#detailsTitle'), scheduleList=$('#scheduleList'), todayBtn=$('#todayBtn'), resetFilters=$('#resetFilters');
 
-  // Скрыть модалку на старте
+  // Гарантированно скрыть модалку на старте
   if(overlay) overlay.style.display='none';
   if(details) details.style.display='none';
 
@@ -78,16 +110,31 @@
     return rows;
   }
 
-  // Рендер карточек
+  // Рендер карточек с навешиванием обработчиков и удалением скелетонов
   function renderCards(list){
     cardsWrap.innerHTML='';
     for(var i=0;i<list.length;i++){
-      var a=list[i], card=document.createElement('button');
-      card.type='button'; card.className='card '+a.type; card.setAttribute('data-index', String(i));
-      card.innerHTML='<div class="card-header">'+(i+1)+'. '+a.date+'</div><div class="card-body">'+a.text+'</div>';
-      cardsWrap.appendChild(card);
+      (function(i){
+        var a=list[i], card=document.createElement('button');
+        card.type='button'; card.className='card '+a.type; card.setAttribute('data-index', String(i));
+        card.innerHTML='<div class="card-header">'+(i+1)+'. '+a.date+'</div><div class="card-body">'+a.text+'</div>';
+        // Прямой обработчик на саму карточку
+        on(card,'click',function(){ openDetails(i); });
+        // Безопасный «tap‑intent»
+        var sx=0,sy=0,st=0;
+        on(card,'touchstart',function(e){ var t=e.touches[0]; sx=t.clientX; sy=t.clientY; st=Date.now(); },{passive:true});
+        on(card,'touchend',function(e){
+          var dt=Date.now()-st; if(dt>300) return;
+          var t=e.changedTouches[0]; var dx=Math.abs(t.clientX-sx), dy=Math.abs(t.clientY-sy);
+          if(dx<10 && dy<10) openDetails(i);
+        });
+        cardsWrap.appendChild(card);
+      })(i);
     }
-    cardsWrap.classList.remove('hidden'); cardsWrap.setAttribute('aria-busy','false'); skeletons&&skeletons.classList.add('hidden');
+    cardsWrap.classList.remove('hidden');
+    cardsWrap.setAttribute('aria-busy','false');
+    // Полностью убираем скелетоны из DOM, чтобы они не перекрывали клики
+    if(skeletons && skeletons.parentNode){ skeletons.parentNode.removeChild(skeletons); }
   }
   renderCards(activities);
 
@@ -99,7 +146,7 @@
   }
   for(var t=0;t<tabs.length;t++){ (function(btn){ on(btn,'click',function(){ showTab(btn.dataset.tab); }); })(tabs[t]); }
 
-  // Фильтры (исправленный цикл без опечаток)
+  // Фильтры
   function applyFilter(type){
     for(var i=0;i<filters.length;i++){
       var active=(filters[i].dataset.filter===type)||(type==='all'&&filters[i].dataset.filter==='all');
@@ -140,24 +187,7 @@
   }
   on(overlay,'click',closeDetails); on(closeBtn,'click',closeDetails);
 
-  // Клик по карточке + «tap‑intent»
-  on(cardsWrap,'click',function(e){
-    var card=e.target.closest?e.target.closest('.card'):null; if(!card) return;
-    openDetails(Number(card.getAttribute('data-index')));
-  });
-  var sx=0,sy=0,st=0;
-  on(cardsWrap,'touchstart',function(e){ var t=e.touches[0]; sx=t.clientX; sy=t.clientY; st=Date.now(); },{passive:true});
-  on(cardsWrap,'touchend',function(e){
-    var dt=Date.now()-st; if(dt>300) return;
-    var t=e.changedTouches[0]; var dx=Math.abs(t.clientX-sx), dy=Math.abs(t.clientY-sy);
-    if(dx<10 && dy<10){
-      var el=document.elementFromPoint(t.clientX,t.clientY);
-      var card=el && el.closest ? el.closest('.card') : null;
-      if(card) openDetails(Number(card.getAttribute('data-index')));
-    }
-  });
-
-  // «Сегодня»
+  // Кнопка «Сегодня»
   on(todayBtn,'click',function(){
     var first=$('#cards .card'); if(first){ first.scrollIntoView({behavior:'smooth',block:'center'}); first.style.filter='brightness(1.08)'; setTimeout(function(){ first.style.filter=''; }, 600); }
   });
