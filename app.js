@@ -1,5 +1,7 @@
 (function(){
   'use strict';
+
+  // Helpers
   function $(sel, root){ return (root||document).querySelector(sel); }
   function $all(sel, root){ return (root||document).querySelectorAll(sel); }
   function on(el, evt, cb, opt){ if (el) el.addEventListener(evt, cb, opt||false); }
@@ -8,9 +10,11 @@
   var ver = (document.body && document.body.dataset && document.body.dataset.version) ? document.body.dataset.version : 'dev';
   var verEl = $('#appVersion'); if (verEl) verEl.textContent = 'v' + ver;
 
-  // Telegram SDK и теминг
+  // Telegram SDK
   var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
   if (tg){ if (typeof tg.expand==='function') tg.expand(); if (typeof tg.ready==='function') tg.ready(); }
+
+  // Темизация
   function applyTheme(){
     if (!tg || !tg.themeParams) return;
     var p = tg.themeParams;
@@ -19,9 +23,21 @@
     if (p.hint_color)    document.documentElement.style.setProperty('--muted', p.hint_color);
     if (p.button_color)  document.documentElement.style.setProperty('--accent', p.button_color);
     if (p.button_text_color) document.documentElement.style.setProperty('--accent-2', p.button_text_color);
+    // Дополнительно выравниваем цвета WebView под тему
+    if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('bg_color');
+    if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('bg_color');
   }
   applyTheme();
   if (tg && typeof tg.onEvent==='function') tg.onEvent('themeChanged', function(){ applyTheme(); });
+
+  // BackButton
+  var backBtn = tg && tg.BackButton ? tg.BackButton : null;
+  function showBack(){ if (backBtn && typeof backBtn.show==='function') backBtn.show(); }
+  function hideBack(){ if (backBtn && typeof backBtn.hide==='function') backBtn.hide(); }
+  hideBack();
+  if (tg && typeof tg.onEvent==='function'){
+    tg.onEvent('back_button_pressed', function(){ closeDetails(); });
+  }
 
   // Данные
   var activities = [
@@ -155,9 +171,17 @@
     scheduleList.innerHTML='';
     var plan=generateSchedule(act);
     for (var i=0;i<plan.length;i++){ var li=document.createElement('li'); li.textContent=plan[i]; scheduleList.appendChild(li); }
+    // Хаптик
+    if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred==='function'){
+      try { tg.HapticFeedback.impactOccurred('medium'); } catch(e){}
+    }
     overlay.classList.remove('hidden'); details.classList.remove('hidden');
+    showBack();
   }
-  function closeDetails(){ overlay.classList.add('hidden'); details.classList.add('hidden'); }
+  function closeDetails(){
+    overlay.classList.add('hidden'); details.classList.add('hidden');
+    hideBack();
+  }
   on(overlay,'click',closeDetails); on(closeBtn,'click',closeDetails);
 
   // Открытие ТОЛЬКО по клику; скролл не блокируется
