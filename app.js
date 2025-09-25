@@ -1,6 +1,7 @@
 (function(){
   'use strict';
 
+  // Универсальный запуск init: сразу если DOM готов, иначе по DOMContentLoaded
   function ready(run){
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', run, { once:true });
@@ -14,18 +15,18 @@
     const $all = (s,r)=> (r||document).querySelectorAll(s);
     const on = (e,t,c,o)=>{ if(e) e.addEventListener(t,c,o||false); };
 
+    // Telegram SDK
     const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
     if (tg){ tg.expand && tg.expand(); tg.ready && tg.ready(); }
 
-    // BackButton — защищённо
+    // BackButton — защищённые вызовы
     const backBtn = (tg && tg.BackButton) ? tg.BackButton : null;
     const showBack = ()=>{ if (backBtn && typeof backBtn.show==='function') backBtn.show(); };
     const hideBack = ()=>{ if (backBtn && typeof backBtn.hide==='function') backBtn.hide(); };
     hideBack();
-
     tg && tg.onEvent && tg.onEvent('back_button_pressed', ()=> closeDetails());
 
-    // Данные
+    // Данные (дни поездки)
     const activities = [
       { type:'sea',   date:'29.12.2025', text:'Пляж Джомтьен + детская зона' },
       { type:'sea',   date:'30.12.2025', text:'Пляж Вонгамат + водные горки' },
@@ -61,6 +62,7 @@
     const cardsWrap = $('#cards'), skeletons = $('#skeletons'), emptyState = $('#emptyState'), filters = $all('.filter'), tabs = $all('.tab');
     const overlay = $('#overlay'), details = $('#details'), closeBtn = $('#closeBtn'), detailsTitle = $('#detailsTitle'), scheduleList = $('#scheduleList'), resetFilters = $('#resetFilters'), countdownBtn = $('#countdownBtn'), footerVer = $('#appVersionFooter');
 
+    // Версия внизу "Контактов"
     if (footerVer){ footerVer.textContent = document.body.dataset.version || 'v0.0.0'; }
 
     // Гарантированно скрываем модалку
@@ -72,12 +74,13 @@
     const parseTime = (s)=>{ const a=s.split(':'); return {h:+a[0], m:+a[1]}; };
     const parseDMY = (dmy)=>{ const m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(dmy); if(!m) return null; return new Date(+m[3],+m[2]-1,+m[1],0,0,0,0); };
 
-    // UTC‑сутки
-    const daysUntil = (start)=>{ if(!start) return null; const now=new Date(); const s=Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()); const t=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()); return Math.ceil((s-t)/86400000); };
+    // UTC‑сутки для «До поездки»
+    const daysUntil = (start)=>{ if(!start) return null; const now=new Date(); const s=Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()); const t=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()); return Math.ceil((s-t)/86400000); }; // [MDN Date.UTC] [web:169]
 
     const updateCountdown = ()=>{ if(!countdownBtn) return; const start=parseDMY(activities[0]&&activities[0].date); const d=daysUntil(start); countdownBtn.textContent=(d>0)?(`⏳ До поездки: ${d} дней`):(d===0?'🎒 Поездка сегодня':'🏝️ Поездка началась'); };
     updateCountdown(); setInterval(updateCountdown, 3600000);
 
+    // Генерация расписания дня
     function generateSchedule(act){
       const departAt='09:00', travelSea=40, travelSight=30, buf=10;
       const rows=[];
@@ -106,6 +109,7 @@
       return rows;
     }
 
+    // Показ/скрытие модалки (защита от «клик‑сквозь»)
     function showModal(){
       overlay.classList.remove('hidden');
       details.classList.remove('hidden');
@@ -129,14 +133,16 @@
       scheduleList.innerHTML='';
       const plan=generateSchedule(act);
       for (let i=0;i<plan.length;i++){ const li=document.createElement('li'); li.textContent=plan[i]; scheduleList.appendChild(li); }
-      // Открываем в следующий тик — защита от «клик‑сквозь»
+      try{ tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred && tg.HapticFeedback.impactOccurred('medium'); }catch(e){}
       setTimeout(showModal, 0);
     }
     function closeDetails(){ hideModal(); }
 
+    // Закрытие: клик только по фону или кнопке
     on(overlay,'click', (e)=>{ if(e.target===overlay) closeDetails(); });
     on(closeBtn,'click',(e)=>{ e.preventDefault(); e.stopPropagation(); closeDetails(); });
 
+    // Рендер карточек
     function renderCards(list){
       cardsWrap.innerHTML='';
       for (let i=0;i<list.length;i++){
@@ -149,11 +155,12 @@
       cardsWrap.classList.remove('hidden');
       cardsWrap.setAttribute('aria-busy','false');
       if (skeletons && skeletons.parentNode){ skeletons.parentNode.removeChild(skeletons); }
-      // Резервное делегирование
+      // Делегирование (резерв)
       on(cardsWrap,'click',(e)=>{ const el=e.target.closest?e.target.closest('.card'):null; if(!el) return; e.preventDefault(); e.stopPropagation(); const i=Number(el.getAttribute('data-index')); if(!isNaN(i)) openDetails(i); });
     }
     renderCards(activities);
 
+    // Вкладки
     function showTab(id){
       const panels=$all('.tab-content'); for (let i=0;i<panels.length;i++) panels[i].classList.add('hidden');
       const p=document.getElementById(id); if(p) p.classList.remove('hidden');
@@ -161,13 +168,36 @@
     }
     for (let i=0;i<tabs.length;i++){ const btn=tabs[i]; on(btn,'click', ()=>{ showTab(btn.dataset.tab); }); }
 
+    // Фильтры
     function applyFilter(type){
-      for (let i=0;i<filters.length;i++){ const active=(filters[i].dataset.filter===type)||(type==='all'&&filters[i].dataset.filter==='all'); filters[i].classList.toggle('active', active); filters[i].setAttribute('aria-pressed', active?'true':'false'); }
+      for (let i=0;i<filters.length;i++){
+        const active=(filters[i].dataset.filter===type)||(type==='all'&&filters[i].dataset.filter==='all');
+        filters[i].classList.toggle('active', active);
+        filters[i].setAttribute('aria-pressed', active?'true':'false');
+      }
       const cards=$all('#cards .card'); let visible=0;
-      for (let k=0;k<cards.length;k++){ const show=(type==='all'||cards[k].classList.contains(type)); cards[k].style.display=show?'flex':'none'; if(show) visible++; }
+      for (let k=0;k<cards.length;k++){
+        const show=(type==='all'||cards[k].classList.contains(type));
+        cards[k].style.display=show?'flex':'none';
+        if (show) visible++;
+      }
       emptyState.classList.toggle('hidden', visible>0);
     }
     for (let i=0;i<filters.length;i++){ const btn=filters[i]; on(btn,'click', ()=> applyFilter(btn.dataset.filter)); }
     on(resetFilters,'click', ()=> applyFilter('all'));
+
+    // Единый обработчик ссылок на блюда (класс .dish-link)
+    document.addEventListener('click', function(e){
+      const a = e.target.closest && e.target.closest('.dish-link');
+      if (!a) return;
+      e.preventDefault();
+      const url = a.getAttribute('href');
+      if (!url) return;
+      if (tg && typeof tg.openLink === 'function'){
+        tg.openLink(url); // встроенный браузер Telegram при поддержке SDK
+      } else {
+        window.open(url, '_blank', 'noopener'); // fallback
+      }
+    }, false);
   });
 })();
