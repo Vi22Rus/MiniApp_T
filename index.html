@@ -8,10 +8,10 @@
   <!-- Telegram Mini Apps SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Cache-busting -->
-  <link rel="stylesheet" href="style.css?v=2025.09.25-UX3.7">
+  <!-- Cache-busting: обновляйте версию при каждом деплое -->
+  <link rel="stylesheet" href="style.css?v=2025.09.25-UX3.8">
 </head>
-<body data-version="2025.09.25-UX3.7">
+<body data-version="2025.09.25-UX3.8">
   <noscript>Для работы приложения требуется JavaScript.</noscript>
 
   <header class="appbar" role="banner">
@@ -34,7 +34,7 @@
   </nav>
 
   <main class="content">
-    <section id="calendar" class="tab-content" role="tabpanel" aria-labelledby="tab-calendar">
+    <section id="calendar" class="tab-content" role="tabpanel">
       <div class="filters sticky" role="toolbar" aria-label="Фильтр активностей">
         <button class="filter active" data-filter="all" aria-pressed="true">🔄 Все</button>
         <button class="filter" data-filter="sea" aria-pressed="false">🌊 Море</button>
@@ -47,7 +47,7 @@
         <div class="skeleton card"></div><div class="skeleton card"></div><div class="skeleton card"></div>
       </div>
 
-      <!-- Карточки -->
+      <!-- Реальные карточки -->
       <div id="cards" class="cards hidden" aria-live="polite" aria-busy="true"></div>
 
       <div id="emptyState" class="empty hidden">
@@ -58,7 +58,7 @@
       </div>
     </section>
 
-    <section id="tips" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-tips">
+    <section id="tips" class="tab-content hidden" role="tabpanel">
       <h2>💡 Полезная информация</h2>
       <div class="section">
         <h3>Советы по поездке</h3>
@@ -80,7 +80,7 @@
       </div>
     </section>
 
-    <section id="contacts" class="tab-content hidden" role="tabpanel" aria-labelledby="tab-contacts">
+    <section id="contacts" class="tab-content hidden" role="tabpanel">
       <h2>📇 Контакты</h2>
       <ul class="list">
         <li>🏠 Club Royal Condominium (12.969175,100.888124)</li>
@@ -96,7 +96,7 @@
     <span id="appVersion">v0.0.0</span>
   </footer>
 
-  <!-- Диалог: инлайн-скрытие, чтобы не зависеть от CSS -->
+  <!-- Диалог: инлайн-скрытие, чтобы не блокировать клики даже без CSS -->
   <div id="overlay" class="overlay hidden" style="display:none" aria-hidden="true"></div>
   <div id="details" class="details hidden" style="display:none" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
     <button id="closeBtn" class="close-btn" aria-label="Закрыть">✖️</button>
@@ -106,6 +106,6 @@
 
   <div id="snackbar" class="snackbar" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="app.js?v=2025.09.25-UX3.7"></script>
+  <script src="app.js?v=2025.09.25-UX3.8"></script>
 </body>
 </html>
