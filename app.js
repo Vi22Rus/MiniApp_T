@@ -1,6 +1,7 @@
 (function(){
   'use strict';
 
+  // Универсальный запуск init
   function ready(run){
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', run, { once:true });
@@ -14,123 +15,125 @@
     const $all = (s,r)=> (r||document).querySelectorAll(s);
     const on = (e,t,c,o)=>{ if(e) e.addEventListener(t,c,o||false); };
 
+    // Telegram SDK
     const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
     if (tg){ tg.expand && tg.expand(); tg.ready && tg.ready(); }
 
+    // BackButton
     const backBtn = (tg && tg.BackButton) ? tg.BackButton : null;
     const showBack = ()=>{ if (backBtn && typeof backBtn.show==='function') backBtn.show(); };
     const hideBack = ()=>{ if (backBtn && typeof backBtn.hide==='function') backBtn.hide(); };
     hideBack();
     tg && tg.onEvent && tg.onEvent('back_button_pressed', ()=> closeDetails());
 
-    // ПОЛНЫЙ список дней — верните его, если он был заменён заглушкой
+    // Данные поездки (с базовой практической инфой)
     const activities = [
-      { type:'sea',   date:'29.12.2025', text:'Пляж Джомтьен + детская зона' },
-      { type:'sea',   date:'30.12.2025', text:'Пляж Вонгамат + водные горки' },
-      { type:'sight', date:'31.12.2025', text:'Ват Янсангварам + прогулка по парку' },
-      { type:'sea',   date:'01.01.2026', text:'Пляж Паттайя + Underwater World' },
-      { type:'sea',   date:'02.01.2026', text:'Морская прогулка к Ко Лан (снорклинг)' },
-      { type:'sight', date:'03.01.2026', text:'Сад Нонг Нуч + шоу слонов' },
-      { type:'sea',   date:'04.01.2026', text:'Пляж Джомтьен' },
-      { type:'sea',   date:'05.01.2026', text:'Пляж Вонгамат + аренда байка' },
-      { type:'sight', date:'06.01.2026', text:'Ват Кхао Пхра Бат + обзорная площадка' },
-      { type:'sea',   date:'07.01.2026', text:'Морская прогулка к Ко Сичанг' },
-      { type:'sea',   date:'08.01.2026', text:'Пляж Паттайя' },
-      { type:'sight', date:'09.01.2026', text:'Dolphin World + детская зона' },
-      { type:'sea',   date:'10.01.2026', text:'Пляж Джомтьен' },
-      { type:'sight', date:'11.01.2026', text:'Батискаф (12.969175,100.888124)' },
-      { type:'sight', date:'12.01.2026', text:'Art in Paradise + плавучий рынок' },
-      { type:'sea',   date:'13.01.2026', text:'Пляж Вонгамат' },
-      { type:'sea',   date:'14.01.2026', text:'Пляж Паттайя' },
-      { type:'sight', date:'15.01.2026', text:'Мини-Сиам + детские аттракционы' },
-      { type:'sea',   date:'16.01.2026', text:'Морская прогулка к Ко Лан' },
-      { type:'sea',   date:'17.01.2026', text:'Пляж Джомтьен' },
-      { type:'sight', date:'18.01.2026', text:'Sea Life Pattaya (аквариум)' },
-      { type:'sea',   date:'19.01.2026', text:'Пляж Вонгамат' },
-      { type:'sea',   date:'20.01.2026', text:'Пляж Паттайя' },
-      { type:'sight', date:'21.01.2026', text:'Ват Пхра Яй + парк Люксор' },
-      { type:'sea',   date:'22.01.2026', text:'Пляж Джомтьен' },
-      { type:'sea',   date:'23.01.2026', text:'Пляж Вонгамат' },
-      { type:'sight', date:'24.01.2026', text:'Central Festival + фуд-корт' },
-      { type:'sea',   date:'25.01.2026', text:'Пляж Паттайя' }
+      { type:'sight', date:'31.12.2025', title:'Ват Ян (Wat Yansangwararam)',
+        gps:{lat:12.7889,lng:100.9581}, open:'ежедн. ~08:00–17:00', price:'донейшн',
+        transport:[
+          'Сонгтео: центр→Сукхумвит (10+20 бат), далее такси',
+          'Тук‑тук (как такси): от 100 бат'
+        ],
+        lunch:[ 'Фудкорт Central Festival (11:00–23:00)' ],
+        tips:[ 'Дресс‑код: закрытые плечи/колени', 'Пить бутилированную воду' ]
+      },
+      { type:'sea', date:'01.01.2026', title:'Пляж Джомтьен',
+        gps:{lat:12.8750,lng:100.8889}, open:'24/7', price:'бесплатно',
+        transport:[ 'Сонгтео центр↔Джомтьен: 10 бат', 'Белые сонгтео по Сукхумвит: 20 бат' ],
+        lunch:[ 'The Glass House: блюда ~200–500 бат' ],
+        tips:[ 'Лучшее время: до 11:00 и после 16:00', 'SPF и вода 1 л/чел.' ]
+      },
+      { type:'sight', date:'24.01.2026', title:'Central Festival Pattaya',
+        gps:{lat:12.934546,lng:100.883775}, open:'ежедн. 11:00–23:00', price:'вход свободный',
+        transport:[ 'Сонгтео по Beach/Second Rd: 10 бат' ],
+        lunch:[ 'Фудкорт: большой выбор, кондиционер' ],
+        tips:[ 'Удобный ориентир в центре', 'Есть зоны отдыха' ]
+      },
+      // Добавьте остальные дни по аналогии…
+      { type:'sea',   date:'29.12.2025', title:'Пляж Вонгамат' },
+      { type:'sight', date:'03.01.2026', title:'Сад Нонг Нуч' },
+      { type:'sea',   date:'02.01.2026', title:'Ко Лан (снорклинг)' },
+      { type:'sight', date:'18.01.2026', title:'Sea Life Pattaya' },
+      { type:'sea',   date:'25.01.2026', title:'Пляж Паттайя' }
     ];
 
+    // DOM
     const cardsWrap = $('#cards'), skeletons = $('#skeletons'), emptyState = $('#emptyState'), filters = $all('.filter'), tabs = $all('.tab');
     const overlay = $('#overlay'), details = $('#details'), closeBtn = $('#closeBtn'), detailsTitle = $('#detailsTitle'), scheduleList = $('#scheduleList'), resetFilters = $('#resetFilters'), countdownBtn = $('#countdownBtn'), footerVer = $('#appVersionFooter');
 
+    // Версия внизу "Контактов"
     if (footerVer){ footerVer.textContent = document.body.dataset.version || 'v0.0.0'; }
+
+    // Принудительно скрываем модалку
     if (overlay){ overlay.style.display='none'; overlay.classList.add('hidden'); overlay.setAttribute('aria-hidden','true'); }
     if (details){ details.style.display='none'; details.classList.add('hidden'); }
 
-    // Время helpers
+    // Helpers
     const add = (hh,mm,addMin)=>{ const d=new Date(2000,0,1,hh,mm,0); d.setMinutes(d.getMinutes()+addMin); return (`0${d.getHours()}`).slice(-2)+':'+(`0${d.getMinutes()}`).slice(-2); };
     const parseTime = (s)=>{ const a=s.split(':'); return {h:+a[0], m:+a[1]}; };
     const parseDMY = (dmy)=>{ const m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(dmy); if(!m) return null; return new Date(+m[3],+m[2]-1,+m[1],0,0,0,0); };
 
-    // Сервис: ближайшая будущая дата из списка (если список пуст — null)
+    // Ближайшая будущая дата (UTC‑полуночь)
     function nextFutureDate(list){
-      const todayUTC = Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()); // UTC‑полночь «сегодня» [web:219][web:169]
+      const now = new Date();
+      const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
       let best = null;
       for (let i=0;i<list.length;i++){
-        const d = parseDMY(list[i].date);
-        if (!d) continue;
-        const ts = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); // сравниваем в UTC [web:219]
+        const d = parseDMY(list[i].date); if(!d) continue;
+        const ts = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
         if (ts >= todayUTC && (best===null || ts < best)) best = ts;
       }
-      return best; // либо timestamp UTC, либо null
+      return best;
     }
 
     // Счётчик «До поездки»
     function updateCountdown(){
       if(!countdownBtn) return;
-      if (!activities || activities.length===0){ // пустой список → явная подсказка
-        countdownBtn.textContent = 'ℹ️ Добавьте даты поездки';
-        return;
-      }
+      if (!activities || activities.length===0){ countdownBtn.textContent='ℹ️ Добавьте даты поездки'; return; }
       const startTs = nextFutureDate(activities);
-      if (startTs===null){
-        countdownBtn.textContent = '🏝️ Поездка началась';
-        return;
-      }
-      const todayUTC = Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()); // [web:219][web:169]
-      const diffDays = Math.ceil((startTs - todayUTC)/86400000); // миллисекунды в сутках [web:170]
+      if (startTs===null){ countdownBtn.textContent='🏝️ Поездка началась'; return; }
+      const now = new Date();
+      const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()); // UTC‑полуночь [MDN]
+      const diffDays = Math.ceil((startTs - todayUTC)/86400000);
       countdownBtn.textContent = (diffDays>0) ? `⏳ До поездки: ${diffDays} дней` : '🎒 Поездка сегодня';
     }
-    updateCountdown(); setInterval(updateCountdown, 3600000);
+    updateCountdown(); setInterval(updateCountdown, 3600000); // раз в час
 
-    // Расписание
+    // Иконки по типу
+    const ICONS = { sea:['🏖️','🌊','🐠','⛱️','🛶'], sight:['🏛️','🗿','🗺️','🏯','📸'] };
+    const pickIcon = (type, i)=> (ICONS[type]||['📌'])[ i % (ICONS[type]||['📌']).length ];
+
+    // Расписание дня с конкретикой
     function generateSchedule(act){
       const departAt='09:00', travelSea=40, travelSight=30, buf=10;
       const rows=[];
-      rows.push(`${departAt} — Выход из дома (вода 1 л/чел., SPF 50+, шляпы, наличные)`);
-      const trvl=(act.type==='sea')?travelSea:travelSight; const arr1=add(parseTime(departAt).h, parseTime(departAt).m, trvl);
-      rows.push(`${departAt}–${arr1} — Дорога (${trvl} мин)`);
-      if(act.type==='sea'){
-        const loc=act.text.split(' +')[0];
-        const startSea=add(parseTime(arr1).h, parseTime(arr1).m, buf), endSea1=add(parseTime(startSea).h, parseTime(startSea).m, 150);
-        rows.push(`${startSea}–${endSea1} — Пляж ${loc}`);
-        const startLunch=add(parseTime(endSea1).h, parseTime(endSea1).m, buf), endLunch=add(parseTime(startLunch).h, parseTime(startLunch).m, 60);
-        rows.push(`${startLunch}–${endLunch} — Обед рядом`);
-        const startSea2=add(parseTime(endLunch).h, parseTime(endLunch).m, buf), endSea2=add(parseTime(startSea2).h, parseTime(startSea2).m, 120);
-        rows.push(`${startSea2}–${endSea2} — Пляж ${loc}`);
-        const startBack=add(parseTime(endSea2).h, parseTime(endSea2).m, buf), endBack=add(parseTime(startBack).h, parseTime(startBack).m, trvl);
-        rows.push(`${startBack}–${endBack} — Дорога домой`);
+      rows.push(`${departAt} — Выход из дома (вода, SPF, шляпы, наличные)`);
+      const travel = (act.type==='sea')?travelSea:travelSight;
+      const arr1 = add(parseTime(departAt).h, parseTime(departAt).m, travel);
+      if (act.transport && act.transport.length){
+        rows.push(`${departAt}–${arr1} — Как добраться: ${act.transport.join(' / ')}`);
       } else {
-        const parts=act.text.split(' +'), main=parts[0], sub=parts[1]||'ближайшая локация';
-        const startMain=add(parseTime(arr1).h, parseTime(arr1).m, buf), endMain=add(parseTime(startMain).h, parseTime(startMain).m, 120);
-        rows.push(`${startMain}–${endMain} — ${main}`);
-        const startSub=add(parseTime(endMain).h, parseTime(endMain).m, buf), endSub=add(parseTime(startSub).h, parseTime(startSub).m, 120);
-        rows.push(`${startSub}–${endSub} — ${sub}`);
-        const startBackS=add(parseTime(endSub).h, parseTime(endSub).m, buf), endBackS=add(parseTime(startBackS).h, parseTime(startBackS).m, trvl);
-        rows.push(`${startBackS}–${endBackS} — Дорога домой`);
+        rows.push(`${departAt}–${arr1} — Дорога по маршруту (уточнить на месте)`);
       }
+      rows.push(`10:00 — Прибытие: ${act.title||act.text||'Локация'}`);
+      if (act.gps) rows.push(`— Координаты: ${act.gps.lat.toFixed(6)}, ${act.gps.lng.toFixed(6)}`);
+      if (act.open) rows.push(`— Время работы: ${act.open}`);
+      if (act.price) rows.push(`— Вход/ценовой ориентир: ${act.price}`);
+      rows.push('10:15–12:15 — Основная активность/осмотр');
+      if (act.lunch && act.lunch.length){
+        rows.push(`12:30–13:30 — Обед: ${act.lunch.join(' / ')}`);
+      } else {
+        rows.push('12:30–13:30 — Обед рядом (фудкорт/кафе)');
+      }
+      if (act.tips && act.tips.length){
+        rows.push(`13:40 — Советы: ${act.tips.join(' • ')}`);
+      }
+      rows.push('14:00–15:00 — Возврат (сонгтео/такси)');
+      rows.push('15:00 — Отдых/план следующего дня');
       return rows;
     }
 
-    // Иконки для карточек
-    const ICONS = { sea:['🏖️','🌊','🐠','⛱️','🛶'], sight:['🏛️','🗿','🗺️','🏯','📸'] };
-    const pickIcon = (type, i)=> (ICONS[type]||['📌'])[ i % (ICONS[type]||['📌']).length ]; // равномерное распределение по индексу [web:281]
-
+    // Показ/скрытие модалки
     function showModal(){
       overlay.classList.remove('hidden');
       details.classList.remove('hidden');
@@ -157,10 +160,11 @@
       setTimeout(showModal, 0);
     }
     function closeDetails(){ hideModal(); }
+
     on(overlay,'click', (e)=>{ if(e.target===overlay) closeDetails(); });
     on(closeBtn,'click',(e)=>{ e.preventDefault(); e.stopPropagation(); closeDetails(); });
 
-    // Рендер карточек (+ обработка пустого списка)
+    // Рендер карточек (без порядковых номеров — только иконка и дата)
     function renderCards(list){
       cardsWrap.innerHTML='';
       if (!list || list.length===0){
@@ -172,9 +176,9 @@
       }
       for (let i=0;i<list.length;i++){
         const a=list[i], card=document.createElement('button');
-        card.type='button'; card.className='card '+a.type; card.setAttribute('data-index', String(i));
+        card.type='button'; card.className='card '+(a.type||''); card.setAttribute('data-index', String(i));
         const icon = pickIcon(a.type, i);
-        card.innerHTML=`<div class="card-header">${icon} ${a.date}</div><div class="card-body">${a.text}</div>`;
+        card.innerHTML = `<div class="card-header">${icon} ${a.date}</div><div class="card-body">${a.title||a.text||''}</div>`;
         on(card,'click',(e)=>{ e.preventDefault(); e.stopPropagation(); const idx=Number(card.getAttribute('data-index')); if(!isNaN(idx)) openDetails(idx); });
         cardsWrap.appendChild(card);
       }
@@ -182,6 +186,7 @@
       cardsWrap.classList.remove('hidden');
       cardsWrap.setAttribute('aria-busy','false');
       if (skeletons && skeletons.parentNode){ skeletons.parentNode.removeChild(skeletons); }
+      // Делегирование на контейнер (резерв)
       on(cardsWrap,'click',(e)=>{ const el=e.target.closest?e.target.closest('.card'):null; if(!el) return; e.preventDefault(); e.stopPropagation(); const i=Number(el.getAttribute('data-index')); if(!isNaN(i)) openDetails(i); });
     }
     renderCards(activities);
@@ -212,7 +217,7 @@
     for (let i=0;i<filters.length;i++){ const btn=filters[i]; on(btn,'click', ()=> applyFilter(btn.dataset.filter)); }
     on(resetFilters,'click', ()=> applyFilter('all'));
 
-    // Ссылки блюд
+    // Ссылки на блюда (раздел «Советы»): открывать во встроенном браузере Telegram
     document.addEventListener('click', function(e){
       const a = e.target.closest && e.target.closest('.dish-link');
       if (!a) return;
