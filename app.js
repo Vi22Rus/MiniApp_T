@@ -6,15 +6,14 @@
   var ver=(document.body&&document.body.dataset&&document.body.dataset.version)?document.body.dataset.version:'dev';
   var verEl=$('#appVersion'); if(verEl) verEl.textContent='v'+ver;
 
-  // Telegram SDK
   var tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;
   if(tg){ tg.expand&&tg.expand(); tg.ready&&tg.ready(); }
 
-  // Контраст helpers
+  // Helpers для контраста
   function hexToRgb(hex){ if(!hex) return null; var h=hex.replace('#',''); if(h.length===3) h=h.split('').map(function(c){return c+c}).join(''); var n=parseInt(h,16); return {r:(n>>16)&255,g:(n>>8)&255,b:n&255}; }
   function luminance(rgb){ if(!rgb) return 0; function f(v){v=v/255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4);} var r=f(rgb.r),g=f(rgb.g),b=f(rgb.b); return 0.2126*r+0.7152*g+0.0722*b; }
-  function ensureContrast(bgHex,textHex){ var bg=hexToRgb(bgHex),tx=hexToRgb(textHex); if(!bg||!tx) return null; var L1=Math.max(luminance(bg),luminance(tx))+0.05, L2=Math.min(luminance(bg),luminance(tx))+0.05; return (L1/L2)>=4.5; }
-  function pickTextForBg(bgHex){ var dark='#111111', light='#0b1220'; var okL=ensureContrast(bgHex,light), okD=ensureContrast(bgHex,dark); if(okL&&!okD) return light; if(okD&&!okL) return dark; var lum=luminance(hexToRgb(bgHex)); return lum<0.5?light:dark; }
+  function ensureContrast(bgHex,textHex){ var h=hexToRgb(bgHex), t=hexToRgb(textHex); if(!h||!t) return null; var L1=Math.max(luminance(h),luminance(t))+0.05, L2=Math.min(luminance(h),luminance(t))+0.05; return (L1/L2)>=4.5; }
+  function pickTextForBg(bg){ var dark='#111111', light='#0b1220'; var okL=ensureContrast(bg,light), okD=ensureContrast(bg,dark); if(okL&&!okD) return light; if(okD&&!okL) return dark; var lum=luminance(hexToRgb(bg)); return lum<0.5?light:dark; }
 
   // Темизация
   function applyTheme(){
@@ -73,7 +72,7 @@
   var cardsWrap=$('#cards'), skeletons=$('#skeletons'), emptyState=$('#emptyState'), filters=$all('.filter'), tabs=$all('.tab');
   var overlay=$('#overlay'), details=$('#details'), closeBtn=$('#closeBtn'), detailsTitle=$('#detailsTitle'), scheduleList=$('#scheduleList'), todayBtn=$('#todayBtn'), resetFilters=$('#resetFilters');
 
-  // Гарантированно скрыть модалку на старте
+  // Гарантированное скрытие модалки на старте
   if(overlay) overlay.style.display='none';
   if(details) details.style.display='none';
 
@@ -97,7 +96,8 @@
       rows.push(startSea2+'–'+endSea2+' — Пляж '+loc+' (закат/фото/прогулка)');
       var startBack=add(t(endSea2).h,t(endSea2).m,buf), endBack=add(t(startBack).h,t(startBack).m,trvl);
       rows.push(startBack+'–'+endBack+' — Дорога домой ('+trvl+' мин)'); rows.push(endBack+' — Душ/ужин/подготовка на завтра');
-    } else { var parts=act.text.split(' +'), main=parts[0], sub=parts[1]||'ближайшая локация';
+    } else {
+      var parts=act.text.split(' +'), main=parts[0], sub=parts[1]||'ближайшая локация';
       var startMain=add(t(arr1).h,t(arr1).m,buf), endMain=add(t(startMain).h,t(startMain).m,120);
       rows.push(startMain+'–'+endMain+' — '+main+' (билеты/скан, дресс‑код, аудиогид)');
       var startLunchS=add(t(endMain).h,t(endMain).m,buf), endLunchS=add(t(startLunchS).h,t(startLunchS).m,60);
@@ -110,63 +110,10 @@
     return rows;
   }
 
-  // Рендер карточек с навешиванием обработчиков и удалением скелетонов
-  function renderCards(list){
-    cardsWrap.innerHTML='';
-    for(var i=0;i<list.length;i++){
-      (function(i){
-        var a=list[i], card=document.createElement('button');
-        card.type='button'; card.className='card '+a.type; card.setAttribute('data-index', String(i));
-        card.innerHTML='<div class="card-header">'+(i+1)+'. '+a.date+'</div><div class="card-body">'+a.text+'</div>';
-        // Прямой обработчик на саму карточку
-        on(card,'click',function(){ openDetails(i); });
-        // Безопасный «tap‑intent»
-        var sx=0,sy=0,st=0;
-        on(card,'touchstart',function(e){ var t=e.touches[0]; sx=t.clientX; sy=t.clientY; st=Date.now(); },{passive:true});
-        on(card,'touchend',function(e){
-          var dt=Date.now()-st; if(dt>300) return;
-          var t=e.changedTouches[0]; var dx=Math.abs(t.clientX-sx), dy=Math.abs(t.clientY-sy);
-          if(dx<10 && dy<10) openDetails(i);
-        });
-        cardsWrap.appendChild(card);
-      })(i);
-    }
-    cardsWrap.classList.remove('hidden');
-    cardsWrap.setAttribute('aria-busy','false');
-    // Полностью убираем скелетоны из DOM, чтобы они не перекрывали клики
-    if(skeletons && skeletons.parentNode){ skeletons.parentNode.removeChild(skeletons); }
-  }
-  renderCards(activities);
+  // Показ модалки — единый путь
+  function showModal(){ overlay.style.display='block'; details.style.display='block'; overlay.classList.remove('hidden'); details.classList.remove('hidden'); overlay.setAttribute('aria-hidden','false'); showBack(); }
+  function hideModal(){ overlay.style.display='none'; details.style.display='none'; overlay.classList.add('hidden'); details.classList.add('hidden'); overlay.setAttribute('aria-hidden','true'); hideBack(); }
 
-  // Вкладки
-  function showTab(id){
-    var panels=$all('.tab-content'); for(var i=0;i<panels.length;i++) panels[i].classList.add('hidden');
-    var p=document.getElementById(id); if(p) p.classList.remove('hidden');
-    for(var j=0;j<tabs.length;j++) tabs[j].classList.toggle('active', tabs[j].dataset.tab===id);
-  }
-  for(var t=0;t<tabs.length;t++){ (function(btn){ on(btn,'click',function(){ showTab(btn.dataset.tab); }); })(tabs[t]); }
-
-  // Фильтры
-  function applyFilter(type){
-    for(var i=0;i<filters.length;i++){
-      var active=(filters[i].dataset.filter===type)||(type==='all'&&filters[i].dataset.filter==='all');
-      filters[i].classList.toggle('active',active);
-      filters[i].setAttribute('aria-pressed',active?'true':'false');
-    }
-    var cards=$all('#cards .card'); var visible=0;
-    for(var k=0;k<cards.length;k++){
-      var show=(type==='all'||cards[k].classList.contains(type));
-      cards[k].style.display=show?'flex':'none';
-      if(show) visible++;
-    }
-    emptyState.classList.toggle('hidden', visible>0);
-  }
-  for(var f=0; f<filters.length; f++){
-    (function(btn){ var type=btn.dataset.filter; on(btn,'click',function(){ applyFilter(type); }); })(filters[f]);
-  }
-  on(resetFilters,'click',function(){ applyFilter('all'); });
-
-  // Диалог + Back + Haptics
   function openDetails(idx){
     var act=activities[idx]; if(!act) return;
     detailsTitle.textContent='День '+(idx+1)+' • '+act.date;
@@ -174,23 +121,51 @@
     var plan=generateSchedule(act);
     for(var i=0;i<plan.length;i++){ var li=document.createElement('li'); li.textContent=plan[i]; scheduleList.appendChild(li); }
     if(tg&&tg.HapticFeedback&&typeof tg.HapticFeedback.impactOccurred==='function'){ try{ tg.HapticFeedback.impactOccurred('medium'); }catch(e){} }
-    overlay.style.display='block'; details.style.display='block';
-    overlay.classList.remove('hidden'); details.classList.remove('hidden');
-    overlay.setAttribute('aria-hidden','false');
-    showBack();
+    showModal();
   }
-  function closeDetails(){
-    overlay.style.display='none'; details.style.display='none';
-    overlay.classList.add('hidden'); details.classList.add('hidden');
-    overlay.setAttribute('aria-hidden','true');
-    hideBack();
-  }
+  function closeDetails(){ hideModal(); }
+
   on(overlay,'click',closeDetails); on(closeBtn,'click',closeDetails);
 
-  // Кнопка «Сегодня»
-  on(todayBtn,'click',function(){
-    var first=$('#cards .card'); if(first){ first.scrollIntoView({behavior:'smooth',block:'center'}); first.style.filter='brightness(1.08)'; setTimeout(function(){ first.style.filter=''; }, 600); }
-  });
+  // Рендер карточек + собственные обработчики
+  function renderCards(list){
+    cardsWrap.innerHTML='';
+    for(var i=0;i<list.length;i++){
+      (function(i){
+        var a=list[i], card=document.createElement('button');
+        card.type='button'; card.className='card '+a.type; card.setAttribute('data-index', String(i));
+        card.innerHTML='<div class="card-header">'+(i+1)+'. '+a.date+'</div><div class="card-body">'+a.text+'</div>';
+        on(card,'click',function(){ openDetails(i); });
+        var sx=0,sy=0,st=0;
+        on(card,'touchstart',function(e){ var t=e.touches[0]; sx=t.clientX; sy=t.clientY; st=Date.now(); },{passive:true});
+        on(card,'touchend',function(e){ var dt=Date.now()-st; if(dt>300) return; var t=e.changedTouches[0]; var dx=Math.abs(t.clientX-sx), dy=Math.abs(t.clientY-sy); if(dx<10&&dy<10) openDetails(i); });
+        cardsWrap.appendChild(card);
+      })(i);
+    }
+    cardsWrap.classList.remove('hidden');
+    cardsWrap.setAttribute('aria-busy','false');
+    if(skeletons&&skeletons.parentNode) skeletons.parentNode.removeChild(skeletons);
+  }
+  renderCards(activities);
+
+  // Доп. делегирование (резервный путь на случай экзотических WebView)
+  on(cardsWrap,'click',function(e){ var el=e.target.closest?e.target.closest('.card'):null; if(el){ var i=Number(el.getAttribute('data-index')); if(!isNaN(i)) openDetails(i); } });
+
+  // Вкладки
+  function showTab(id){ var panels=$all('.tab-content'); for(var i=0;i<panels.length;i++) panels[i].classList.add('hidden'); var p=document.getElementById(id); if(p) p.classList.remove('hidden'); for(var j=0;j<tabs.length;j++) tabs[j].classList.toggle('active', tabs[j].dataset.tab===id); }
+  for(var t=0;t<tabs.length;t++){ (function(btn){ on(btn,'click',function(){ showTab(btn.dataset.tab); }); })(tabs[t]); }
+
+  // Фильтры
+  function applyFilter(type){
+    for(var i=0;i<filters.length;i++){ var active=(filters[i].dataset.filter===type)||(type==='all'&&filters[i].dataset.filter==='all'); filters[i].classList.toggle('active',active); filters[i].setAttribute('aria-pressed',active?'true':'false'); }
+    var cards=$all('#cards .card'); var visible=0; for(var k=0;k<cards.length;k++){ var show=(type==='all'||cards[k].classList.contains(type)); cards[k].style.display=show?'flex':'none'; if(show)visible++; }
+    emptyState.classList.toggle('hidden', visible>0);
+  }
+  for(var f=0; f<filters.length; f++){ (function(btn){ var type=btn.dataset.filter; on(btn,'click',function(){ applyFilter(type); }); })(filters[f]); }
+  on(resetFilters,'click',function(){ applyFilter('all'); });
+
+  // «Сегодня»
+  on(todayBtn,'click',function(){ var first=$('#cards .card'); if(first){ first.scrollIntoView({behavior:'smooth',block:'center'}); first.style.filter='brightness(1.08)'; setTimeout(function(){ first.style.filter=''; }, 600); } });
 
   showTab('calendar');
 })();
