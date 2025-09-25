@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  // Универсальный запуск init: сразу если DOM готов, иначе по DOMContentLoaded
+  // Универсальный запуск init
   function ready(run){
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', run, { once:true });
@@ -19,14 +19,14 @@
     const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
     if (tg){ tg.expand && tg.expand(); tg.ready && tg.ready(); }
 
-    // BackButton — защищённые вызовы
+    // BackButton
     const backBtn = (tg && tg.BackButton) ? tg.BackButton : null;
     const showBack = ()=>{ if (backBtn && typeof backBtn.show==='function') backBtn.show(); };
     const hideBack = ()=>{ if (backBtn && typeof backBtn.hide==='function') backBtn.hide(); };
     hideBack();
     tg && tg.onEvent && tg.onEvent('back_button_pressed', ()=> closeDetails());
 
-    // Данные (дни поездки)
+    // Данные
     const activities = [
       { type:'sea',   date:'29.12.2025', text:'Пляж Джомтьен + детская зона' },
       { type:'sea',   date:'30.12.2025', text:'Пляж Вонгамат + водные горки' },
@@ -65,17 +65,17 @@
     // Версия внизу "Контактов"
     if (footerVer){ footerVer.textContent = document.body.dataset.version || 'v0.0.0'; }
 
-    // Гарантированно скрываем модалку
+    // Принудительно скрываем модалку
     if (overlay){ overlay.style.display='none'; overlay.classList.add('hidden'); overlay.setAttribute('aria-hidden','true'); }
     if (details){ details.style.display='none'; details.classList.add('hidden'); }
 
-    // Время helpers (исправлено: parseTime вместо t())
+    // Время helpers
     const add = (hh,mm,addMin)=>{ const d=new Date(2000,0,1,hh,mm,0); d.setMinutes(d.getMinutes()+addMin); return (`0${d.getHours()}`).slice(-2)+':'+(`0${d.getMinutes()}`).slice(-2); };
     const parseTime = (s)=>{ const a=s.split(':'); return {h:+a[0], m:+a[1]}; };
     const parseDMY = (dmy)=>{ const m=/^(\d{2})\.(\d{2})\.(\d{4})$/.exec(dmy); if(!m) return null; return new Date(+m[3],+m[2]-1,+m[1],0,0,0,0); };
 
     // UTC‑сутки для «До поездки»
-    const daysUntil = (start)=>{ if(!start) return null; const now=new Date(); const s=Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()); const t=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()); return Math.ceil((s-t)/86400000); }; // [MDN Date.UTC] [web:169]
+    const daysUntil = (start)=>{ if(!start) return null; const now=new Date(); const s=Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()); const t=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()); return Math.ceil((s-t)/86400000); };
 
     const updateCountdown = ()=>{ if(!countdownBtn) return; const start=parseDMY(activities[0]&&activities[0].date); const d=daysUntil(start); countdownBtn.textContent=(d>0)?(`⏳ До поездки: ${d} дней`):(d===0?'🎒 Поездка сегодня':'🏝️ Поездка началась'); };
     updateCountdown(); setInterval(updateCountdown, 3600000);
@@ -109,7 +109,7 @@
       return rows;
     }
 
-    // Показ/скрытие модалки (защита от «клик‑сквозь»)
+    // Показ/скрытие модалки
     function showModal(){
       overlay.classList.remove('hidden');
       details.classList.remove('hidden');
@@ -138,7 +138,7 @@
     }
     function closeDetails(){ hideModal(); }
 
-    // Закрытие: клик только по фону или кнопке
+    // Закрытие: только клик по фону и кнопке
     on(overlay,'click', (e)=>{ if(e.target===overlay) closeDetails(); });
     on(closeBtn,'click',(e)=>{ e.preventDefault(); e.stopPropagation(); closeDetails(); });
 
@@ -194,7 +194,7 @@
       const url = a.getAttribute('href');
       if (!url) return;
       if (tg && typeof tg.openLink === 'function'){
-        tg.openLink(url); // встроенный браузер Telegram при поддержке SDK
+        tg.openLink(url); // встроенный браузер Telegram
       } else {
         window.open(url, '_blank', 'noopener'); // fallback
       }
