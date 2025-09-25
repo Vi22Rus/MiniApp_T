@@ -87,7 +87,7 @@ body{
 .overlay.hidden{display:none !important; pointer-events:none !important}
 .details{
   position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
-  width:92vw; max-width:420px; /* без min() */
+  width:92vw; max-width:420px;
   background:#fff; color:#0b1220;
   border-radius: var(--radius); padding:16px 16px 12px;
   box-shadow: 0 18px 40px rgba(0,0,0,0.35); z-index:50;
