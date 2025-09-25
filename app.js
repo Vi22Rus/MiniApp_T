@@ -1,7 +1,5 @@
 (function(){
   'use strict';
-
-  // Helpers
   function $(sel, root){ return (root||document).querySelector(sel); }
   function $all(sel, root){ return (root||document).querySelectorAll(sel); }
   function on(el, evt, cb, opt){ if (el) el.addEventListener(evt, cb, opt||false); }
@@ -14,7 +12,7 @@
   var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
   if (tg){ if (typeof tg.expand==='function') tg.expand(); if (typeof tg.ready==='function') tg.ready(); }
 
-  // Темизация
+  // Темизация и выравнивание цветов web‑view под тему Telegram
   function applyTheme(){
     if (!tg || !tg.themeParams) return;
     var p = tg.themeParams;
@@ -23,14 +21,13 @@
     if (p.hint_color)    document.documentElement.style.setProperty('--muted', p.hint_color);
     if (p.button_color)  document.documentElement.style.setProperty('--accent', p.button_color);
     if (p.button_text_color) document.documentElement.style.setProperty('--accent-2', p.button_text_color);
-    // Дополнительно выравниваем цвета WebView под тему
     if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('bg_color');
     if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('bg_color');
   }
   applyTheme();
   if (tg && typeof tg.onEvent==='function') tg.onEvent('themeChanged', function(){ applyTheme(); });
 
-  // BackButton
+  // BackButton (нативная навигация)
   var backBtn = tg && tg.BackButton ? tg.BackButton : null;
   function showBack(){ if (backBtn && typeof backBtn.show==='function') backBtn.show(); }
   function hideBack(){ if (backBtn && typeof backBtn.hide==='function') backBtn.hide(); }
@@ -86,7 +83,7 @@
   var todayBtn = $('#todayBtn');
   var resetFilters = $('#resetFilters');
 
-  // Время-помощники
+  // Time helpers
   function add(hh, mm, addMin){ var d = new Date(2000,0,1, hh, mm, 0); d.setMinutes(d.getMinutes()+addMin); return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
   function t(s){ var a=s.split(':'); return {h:+a[0], m:+a[1]}; }
 
@@ -119,7 +116,7 @@
     return rows;
   }
 
-  // Рендер карточек
+  // Render
   function renderCards(list){
     cardsWrap.innerHTML='';
     for (var i=0;i<list.length;i++){
@@ -134,7 +131,7 @@
   }
   renderCards(activities);
 
-  // Вкладки
+  // Tabs
   function showTab(id){
     var panels=$all('.tab-content'); for (var i=0;i<panels.length;i++) panels[i].classList.add('hidden');
     var p=document.getElementById(id); if (p) p.classList.remove('hidden');
@@ -144,7 +141,7 @@
     (function(btn){ on(btn,'click',function(){ showTab(btn.dataset.tab); }); })(tabs[tIndex]);
   }
 
-  // Фильтры
+  // Filters
   function applyFilter(type){
     for (var i=0;i<filters.length;i++){
       var active=(filters[i].dataset.filter===type)||(type==='all'&&filters[i].dataset.filter==='all');
@@ -164,14 +161,13 @@
   }
   on(resetFilters,'click',function(){ applyFilter('all'); });
 
-  // Диалог
+  // Dialog + Back + Haptics
   function openDetails(idx){
     var act=activities[idx]; if (!act) return;
     detailsTitle.textContent='День '+(idx+1)+' • '+act.date;
     scheduleList.innerHTML='';
     var plan=generateSchedule(act);
     for (var i=0;i<plan.length;i++){ var li=document.createElement('li'); li.textContent=plan[i]; scheduleList.appendChild(li); }
-    // Хаптик
     if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred==='function'){
       try { tg.HapticFeedback.impactOccurred('medium'); } catch(e){}
     }
@@ -184,13 +180,11 @@
   }
   on(overlay,'click',closeDetails); on(closeBtn,'click',closeDetails);
 
-  // Открытие ТОЛЬКО по клику; скролл не блокируется
+  // Открытие только по клику + «tap‑intent» без блокировки скролла
   on(cardsWrap,'click',function(e){
     var card=e.target.closest?e.target.closest('.card'):null; if(!card) return;
     openDetails(Number(card.getAttribute('data-index')));
   });
-
-  // Лёгкий «tap‑intent»: короткое касание без сдвига обрабатываем как клик
   var sx=0, sy=0, st=0;
   on(cardsWrap,'touchstart',function(e){ var t=e.touches[0]; sx=t.clientX; sy=t.clientY; st=Date.now(); },{passive:true});
   on(cardsWrap,'touchend',function(e){
@@ -203,7 +197,7 @@
     }
   });
 
-  // Кнопка «Сегодня»
+  // Today
   on(todayBtn,'click',function(){
     var first = $('#cards .card'); if(first){ first.scrollIntoView({behavior:'smooth',block:'center'}); first.style.filter='brightness(1.08)'; setTimeout(function(){ first.style.filter=''; }, 600); }
   });
