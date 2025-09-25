@@ -10,7 +10,6 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 
-/* Базовый фон и текст из themeParams; градиент включаем только на тёмной теме (body.tg-dark) */
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -76,7 +75,7 @@ body.tg-dark{
 .skeleton{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius);min-height:104px;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%{opacity:.45}50%{opacity:.75}100%{opacity:.45}}
 
-/* Разделы — читаемый цвет из темы */
+/* Явный читаемый цвет разделов */
 .section, .list, .grid-list, #tips, #contacts { color: var(--text); }
 
 /* Empty / Dialog */
